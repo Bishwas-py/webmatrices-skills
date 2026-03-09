@@ -9,6 +9,8 @@ argument-hint: [post-slug-or-id] [persona-username]
 
 Draft an authentic, high-quality reply to a Webmatrices post or comment that matches the engagement patterns people actually appreciate on the platform.
 
+For shared research workflows and viral content patterns, see [content-engine.md](../_shared/content-engine.md).
+
 ## What Makes a Good Reply (data-driven)
 
 Analysis of 359 comments shows replies that get 2-5 likes share these traits:
@@ -76,6 +78,23 @@ Categorize the post:
 | **SEO question** | "ranking", "backlinks", "traffic", "core update" | WebSearch for current SEO data |
 | **Tech/coding** | code snippets, framework names, error messages | WebSearch + codebase knowledge |
 | **Discussion/opinion** | thought pieces, debates, hot takes | WebSearch for supporting data/counterpoints |
+
+### Step 2b: Reddit context check
+
+After categorizing the post, search Reddit for what people are currently saying about the same topic:
+
+1. Use `search_reddit` with the post's core topic (e.g. "adsense low value content rejection")
+2. Target 2-3 relevant subreddits from the mapping in content-engine.md
+3. Pull `get_post_details` on 1-2 high-engagement threads
+4. Extract:
+   - Real user experiences and data points
+   - Common advice being given (to either agree with or counter)
+   - Any recent changes or news referenced
+
+Use these Reddit insights to:
+- Add real-world context to the reply ("saw someone on r/Adsense deal with the same thing...")
+- Back up advice with community evidence
+- Identify contrarian angles the user hasn't considered
 
 ### Step 3: Research (choose the right tool)
 
@@ -149,6 +168,12 @@ If persona provided as `$1`, use that user. Otherwise, use the audience-matcher 
 - Short paragraphs. No walls of text.
 - HTML format: `<p>`, `<strong>`, `<ol>`, `<ul>`, `<code>`, `<a>` tags
 - Max 300-500 words for reviews, 100-200 for discussion replies
+
+**Apply viral content patterns from content-engine.md:**
+- Lead with what's specific to THEIR situation
+- Include a data point from Reddit research or fact-checking
+- One contrarian insight they didn't expect
+- Close with a question that invites follow-up
 
 **What to NEVER do:**
 - Generic advice lists ("1. Create quality content 2. Improve SEO 3. Be patient")
