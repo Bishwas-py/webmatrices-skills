@@ -1,0 +1,16 @@
+{
+  "name": "webmatrices",
+  "owner": {
+    "name": "Bishwas Bhandari"
+  },
+  "metadata": {
+    "description": "Claude Code plugin — community management toolkit for Webmatrices (spam detection, content seeding, smart replies, database analytics)"
+  },
+  "plugins": [
+    {
+      "name": "webmatrices",
+      "source": "./",
+      "description": "Webmatrices community management — spam scanning, persona publishing, smart replies, and natural language database queries"
+    }
+  ]
+}

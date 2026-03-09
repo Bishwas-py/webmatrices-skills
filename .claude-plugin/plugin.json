@@ -1,0 +1,11 @@
+{
+  "name": "webmatrices",
+  "description": "Webmatrices community management toolkit — spam moderation, content seeding, persona management, trending topic research, and database analytics.",
+  "version": "1.0.0",
+  "author": {
+    "name": "Bishwas Bhandari"
+  },
+  "homepage": "https://webmatrices.com",
+  "repository": "https://github.com/Bishwas-py/webmatrices-skills",
+  "license": "MIT"
+}

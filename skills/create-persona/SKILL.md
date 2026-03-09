@@ -1,0 +1,63 @@
+---
+name: create-persona
+description: Create a new user persona account for content seeding on Webmatrices. Use when asked to create a new user, persona, or fake account for posting.
+disable-model-invocation: true
+argument-hint: [username]
+---
+
+# Create Persona
+
+Create a new user account on Webmatrices for content seeding purposes.
+
+## Database Connection
+
+All scripts MUST run from `~/Projects/webm-frontend` for Prisma access. Read production credentials from `.env`:
+
+```bash
+cd ~/Projects/webm-frontend
+DATABASE_URL=$(grep '^PROD_DATABASE_URL=' .env | cut -d'"' -f2) node temp-script.mjs
+```
+
+## Password Hashing
+
+Use the Django PBKDF2 format used by the codebase:
+
+```typescript
+import crypto from 'crypto';
+
+function hashDjangoPassword(password: string): string {
+  const iterations = 390000;
+  const salt = crypto.randomBytes(12).toString('base64');
+  const hash = crypto.pbkdf2Sync(password, salt, iterations, 32, 'sha256');
+  return `pbkdf2_sha256$${iterations}$${salt}$${hash.toString('base64')}`;
+}
+```
+
+## Persona Guidelines
+
+When creating a persona, match these conventions:
+- **Email**: Use `bishwasbh+<username>@gmail.com` format
+- **Password**: Use a strong default like `Webm@tr1ces2026!` (tell the user)
+- **Bio**: Short, lowercase, casual — matches the community tone
+- **Auth status**: Set `isConfirmed: true` so they can post immediately
+
+## Existing Persona Styles (reference)
+
+| Persona | Voice | Topics |
+|---------|-------|--------|
+| techwizardrino | tech/dev, slightly casual, real numbers | AI tools, AdSense, coding |
+| digitaldave01 | SEO/marketing, practical, tool-focused | SEO tools, AI predictions |
+| romanking | sharp, punchy, slightly cynical | vibe coding, workplace AI |
+| serpsherpa | storytelling, SEO practitioner | backlinks, client stories, SEO strategy |
+| warmreboot | first-person, anxious dev, uses real numbers | AdSense, web dev, monetization |
+
+## Workflow
+
+1. If username provided as argument, use it. Otherwise, suggest 3-4 username options that sound dev-adjacent and informal
+2. Ask the user to pick or provide a username
+3. Create the user with:
+   - `isActive: true`, `isStaff: false`, `isSuperuser: false`
+   - A Profile with a short bio
+   - An AuthStatus with `isConfirmed: true`
+4. Display the created user details (ID, username, email, password)
+5. Clean up temporary scripts
