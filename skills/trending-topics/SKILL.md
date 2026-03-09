@@ -1,46 +1,132 @@
 ---
 name: trending-topics
-description: Fetch trending topics from the internet relevant to Webmatrices audience. Use when asked about trending topics, what to write about, content ideas, or what's hot.
+description: Find trending content ideas from Reddit, fact-check with live data, and draft a Webmatrices post. Use when asked about trending topics, content ideas, what to write about, or what's hot.
 disable-model-invocation: true
+argument-hint: [topic-or-segment]
 ---
 
 # Trending Topics
 
-Fetch and curate trending topics from the internet that are relevant to the Webmatrices audience.
+Find trending content ideas from Reddit, verify with live data, and draft a publish-ready Webmatrices post.
 
-## Webmatrices Audience Segments
+For shared research workflows and viral content patterns, see [content-engine.md](../_shared/content-engine.md).
 
-The platform serves these key audiences (ordered by size):
+## Arguments
 
-1. **AdSense seekers** — people trying to get approved or improve ad revenue
-2. **Fiverr freelancers** — sellers looking to improve gig performance
-3. **SEO practitioners** — from beginners to agency owners
-4. **Web developers** — SvelteKit, AI tools, vibe coding, SaaS builders
-5. **Startup founders** — indie hackers, micro-SaaS, bootstrappers
-
-## Search Queries to Run
-
-Use WebSearch with queries like:
-- `Google AdSense changes [current month] [current year]`
-- `Google core update [current month] [current year]`
-- `Fiverr trends freelancing [current year]`
-- `AI coding tools vibe coding news [current month] [current year]`
-- `SEO news changes [current month] [current year]`
-- `trending tech discussions Reddit Hacker News [current month] [current year]`
-- `SaaS startup news [current month] [current year]`
-
-## Output Format
-
-For each relevant topic, provide:
-- **Topic title** — what happened
-- **Why it matters for Webmatrices** — which audience segment cares
-- **Post angle** — how to write about it (what persona, what hook)
-- **Urgency** — is it time-sensitive (deadline, rollout date)?
+- **No args** → broad scan (browse hot posts from all Tier 1 subs)
+- **Segment keyword** (`adsense`, `fiverr`, `seo`, `webdev`, `saas`, `ai`) → targeted subreddits per mapping in content-engine.md
+- **Free text** (e.g. "adsense rejection rates") → Reddit search query across all subs
 
 ## Workflow
 
-1. Run 3-5 WebSearch queries covering the audience segments
-2. Filter results for relevance to Webmatrices audience
-3. Rank by: time-sensitivity > audience size > engagement potential
-4. Present 5-10 curated topics with actionable post angles
-5. Recommend the top 2-3 to write about first
+### Step 1: Parse the argument
+
+Check `$ARGUMENTS`:
+- Empty → broad scan mode
+- Matches a keyword (adsense/fiverr/seo/webdev/saas/ai) → targeted mode with mapped subs from content-engine.md
+- Anything else → free text search mode
+
+### Step 2: Reddit Scout
+
+**Broad scan mode:**
+For each Tier 1 subreddit (Adsense, Blogging, SEO, webdev, SaaS):
+```
+browse_subreddit(subreddit, sort="hot", limit=10)
+```
+
+**Targeted mode:**
+```
+search_reddit(query=keyword, subreddits=mapped_subs, sort="hot", time="week", limit=15)
+```
+
+**Free text mode:**
+```
+search_reddit(query=free_text, sort="relevance", time="month", limit=20)
+```
+
+Filter results: keep only posts with score >= 5 AND comments >= 3.
+
+### Step 3: Rank and present
+
+Apply the ranking formula from content-engine.md:
+```
+engagement_score = (upvotes * 0.4) + (num_comments * 0.6)
+posts < 48h old get 1.5x multiplier
+```
+
+Present top 5-8 results to user as a table:
+
+| # | Title | Subreddit | Score | Comments | Angle |
+|---|-------|-----------|-------|----------|-------|
+
+For each, include a one-line suggested angle for a Webmatrices post.
+
+Ask user to pick one (or request more results).
+
+### Step 4: Deep dive
+
+On the user's pick, run `get_post_details` for the chosen post.
+
+Extract:
+- Key claims with specific numbers
+- Top comment insights (often better than OP)
+- URLs mentioned in thread
+- Pain points and unanswered questions
+- The contrarian angle or surprising insight
+
+Present a summary: "here's what this thread is really about, and here's the angle I'd take."
+
+### Step 5: Fact-check and research
+
+Follow the fact-checking workflow from content-engine.md:
+
+1. **WebSearch** — 2-3 queries to verify the key claims from the thread
+   - Is this policy change real? When did it happen?
+   - Are the numbers accurate? What do other sources say?
+   - Any newer data that updates or contradicts the thread?
+
+2. **Playwright** (only if the thread contains URLs worth crawling)
+   - Crawl linked pages for stats, evidence, screenshots
+   - Extract specific data points to strengthen the post
+
+3. Flag anything unverifiable — frame as "reddit users report" not fact
+
+Present findings: "here's what checked out, here's what didn't, here's new data I found."
+
+### Step 6: Draft the post
+
+1. **Pick persona** — use audience-matcher logic:
+   - AdSense topic → warmreboot or techwizardrino
+   - SEO topic → serpsherpa or digitaldave01
+   - Web dev / AI → romanking or bishwasbhn
+   - Hot take → romanking
+   - Fiverr → simonokimo or techwizardrino
+
+2. **Apply viral patterns** from content-engine.md:
+   - Jagged number in title
+   - Hook in first line (fact or tension)
+   - Personal angle + data/evidence
+   - Contrarian insight
+   - Closing question
+
+3. **Format:**
+   - HTML body (`<p>`, `<h2>`, `<strong>`, `<ol>`, `<ul>`)
+   - 300-500 words
+   - Include an excerpt (1-2 sentences)
+   - Lowercase title
+
+4. **Credit sources** — reference Reddit discussion naturally ("someone on r/Adsense pointed out..."), don't link directly to Reddit threads.
+
+Present the full draft to user:
+- Persona chosen (and why)
+- Title
+- Excerpt
+- Full HTML body
+- Ask for approval or edits
+
+### Step 7: Hand off to publish-post
+
+On approval, tell user:
+> "Draft ready. Run `/webmatrices:publish-post [persona-username]` to publish, or edit the draft first."
+
+Do NOT insert into the database directly. The publish-post skill handles DB insertion.
