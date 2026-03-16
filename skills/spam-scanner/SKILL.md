@@ -6,64 +6,43 @@ disable-model-invocation: true
 
 # Spam Scanner
 
-Scan the Webmatrices production database for spam posts, soft-delete them, and ban the spammer accounts.
-
-## Database Connection
-
-All scripts MUST run from `~/Projects/webm-frontend` for Prisma access. Read production credentials from `.env`:
-
-```bash
-cd ~/Projects/webm-frontend
-DATABASE_URL=$(grep '^PROD_DATABASE_URL=' .env | cut -d'"' -f2) node temp-script.mjs
-```
+Scan the Webmatrices production database for spam posts, delete them, and ban spammer accounts using MCP tools.
 
 ## Spam Detection Patterns
 
-Match against post `title + body` using these regex patterns:
+Search for these patterns using `search_posts_by_content`:
 
 ```
 # Indonesian call center / airline / bank scams
-/reschedule.*tiket/i
-/restrukturisasi/i
-/menghubungi\s+cs/i
-/layanan\s+bantuan/i
-/lupa\s+pin\s+brimo/i
-/pembatalan\s+kredit/i
-/call\s+center.*24\s+jam/i
-/costumer\s+service\s+maskapai/i
-/hubungi.*whatsapp.*\+?62/i
-/blokir.*brimo/i
-/cara\s+(membatalkan|pengajuan|menghubungi)/i
+hubungi, whatsapp, call center, layanan bantuan, lupa pin,
+brimo, blokir, membatalkan, reschedule tiket, restrukturisasi,
+costumer service maskapai, cara mengatasi, cara membuka,
+terblokir, salah pin, dana bantuan, pinjaman online
 
-# Phone number spam (Indonesian format)
-/\+?62[\-\s]?\d{3,4}[\-\s]?\d{3,4}[\-\s]?\d{2,4}/
-
-# Disguised phone numbers with unicode
-/𝐎\d{2,}/
-/O899.*call\s+center/i
-
-# Loan/fintech spam
-/spinjam/i
-/easycash.*whatsapp/i
+# Gambling/adult spam
+slot gacor, togel, judi online, obat kuat, vimax, pembesar
 ```
 
 ## Workflow
 
-1. Query all posts where `deletedAt IS NULL`
-2. Run each post's `title + body` against the spam patterns
-3. Display found spam posts with title, author, email, and creation date
+1. Search for spam using `search_posts_by_content` with key patterns (run multiple searches):
+   - `search_posts_by_content` with pattern `hubungi`
+   - `search_posts_by_content` with pattern `whatsapp`
+   - `search_posts_by_content` with pattern `brimo`
+   - `search_posts_by_content` with pattern `blokir`
+   - `search_posts_by_content` with pattern `slot gacor`
+   - Any other suspicious patterns as needed
+2. Also use `list_posts` to review recent posts visually for anything the keyword search missed
+3. Display found spam posts with title, author, and user ID
 4. **Ask the user for confirmation before taking any action**
 5. On confirmation:
-   - Soft-delete spam posts (`UPDATE posts SET deleted_at = NOW()`)
-   - Soft-delete comments on those posts
-   - Ban spammer accounts (`UPDATE users SET is_active = false`)
-6. Verify the cleanup succeeded
-7. Clean up any temporary scripts created
+   - Use `delete_posts` with the spam post IDs
+   - Use `ban_user` for each spammer (with `deleteContent: true` to catch any other posts)
+6. Verify with `list_posts` that the spam is gone
 
 ## Important
 
-- Always use **soft-delete** (set `deleted_at`), never hard-delete
+- The MCP tools handle soft-deletion, session cleanup, and audit logging automatically
 - Always **ask for confirmation** before deleting or banning
-- Show a clear summary table of what was found
-- Clean up temporary `.ts` scripts after execution
+- Show a clear summary of what was found
 - Exclude posts by users with emails starting with `bishwasbh` (admin/persona accounts)

@@ -9,6 +9,8 @@ argument-hint: [username]
 
 Create a new user account on Webmatrices for content seeding purposes.
 
+> **Note:** There is no MCP tool for user creation yet. This skill uses a temporary database script. All other operations (posting, replying, banning) should use MCP tools.
+
 ## Database Connection
 
 All scripts MUST run from `~/Projects/webm-frontend` for Prisma access. Read production credentials from `.env`:
@@ -53,11 +55,12 @@ When creating a persona, match these conventions:
 
 ## Workflow
 
-1. If username provided as argument, use it. Otherwise, suggest 3-4 username options that sound dev-adjacent and informal
+1. If username provided as argument, use it. Otherwise, suggest 3-4 username options
 2. Ask the user to pick or provide a username
-3. Create the user with:
+3. Create the user with a temporary script:
    - `isActive: true`, `isStaff: false`, `isSuperuser: false`
    - A Profile with a short bio
    - An AuthStatus with `isConfirmed: true`
 4. Display the created user details (ID, username, email, password)
 5. Clean up temporary scripts
+6. After creation, use MCP tools for all further operations (posting, etc.)

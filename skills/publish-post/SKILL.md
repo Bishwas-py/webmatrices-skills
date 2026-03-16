@@ -7,16 +7,7 @@ argument-hint: [username] [topic]
 
 # Publish Post
 
-Write and publish a post on Webmatrices as a specific user persona.
-
-## Database Connection
-
-All scripts MUST run from `~/Projects/webm-frontend` for Prisma access. Read production credentials from `.env`:
-
-```bash
-cd ~/Projects/webm-frontend
-DATABASE_URL=$(grep '^PROD_DATABASE_URL=' .env | cut -d'"' -f2) node temp-script.mjs
-```
+Write and publish a post on Webmatrices as a specific user persona using MCP tools.
 
 ## Writing Style Guidelines
 
@@ -29,37 +20,37 @@ Match the voice of the persona being used. General principles across all Webmatr
 - **End with a question** — drives engagement and replies
 - **HTML body** — use `<p>`, `<h2>`, `<strong>`, `<ol>`, `<ul>`, `<code>` tags
 - **No emojis** in body text unless it fits the persona
-- **Include an excerpt** — 1-2 sentence summary for previews
-
-## Post Schema
-
-```typescript
-{
-  title: string,           // lowercase, punchy
-  slug: string,            // kebab-case from title
-  body: string,            // HTML content
-  excerpt: string,         // 1-2 sentences
-  authorId: number,        // user ID of the persona
-  publishedAt: new Date(), // set to now
-}
-```
+- **300+ words** for opinion/news pieces
 
 ## Workflow
 
 1. Identify which persona to use:
-   - If username provided as `$0`, look up that user
+   - If username provided, use `get_user_details` with `username` to look them up
    - Otherwise, suggest the best-matching persona for the topic
-2. If topic provided as `$1`, use it. Otherwise, ask what to write about
+2. If topic provided, use it. Otherwise, ask what to write about
 3. Research the topic if needed (use WebSearch for current data/stats)
 4. Write the post in the persona's voice
 5. Show the draft to the user for approval
-6. On approval, insert into the database
-7. Display the post ID, slug, and title
-8. Clean up temporary scripts
+6. On approval, use `create_post` with:
+   - `authorId`: the persona's user ID
+   - `title`: lowercase, punchy
+   - `body`: full HTML content
+   - `tagSlugs`: relevant tag slugs (e.g., `["google-adsense", "digi-work"]`)
+7. Display the result (post ID, slug)
+
+## Available Tags
+
+Use `list_tags` to get current tags. Common ones:
+- `google-adsense` — AdSense topics
+- `digi-work` — Freelancing/Fiverr/Upwork
+- `programming` — Coding/tech
+- `ai-founder` — AI tools/startups
+- `sveltekit` — SvelteKit framework
+- `django` — Django framework
 
 ## Important
 
-- Always verify the persona user exists and is active before publishing
-- Generate a unique slug from the title
-- Set `publishedAt` to now so it appears immediately
-- The body should be substantive (300+ words for opinion/news pieces)
+- The MCP `create_post` tool runs content moderation (`guardContent`) automatically
+- It generates unique slugs, updates tag counts, and creates audit logs
+- Always verify the persona exists and is active before publishing
+- Show the draft for approval before creating
