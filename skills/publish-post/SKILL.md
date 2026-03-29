@@ -36,7 +36,30 @@ Match the voice of the persona being used. General principles across all Webmatr
    - `title`: lowercase, punchy
    - `body`: full HTML content
    - `tagSlugs`: relevant tag slugs (e.g., `["google-adsense", "digi-work"]`)
+   - `createdAt`: ISO date string (optional, for backdating)
 7. Display the result (post ID, slug)
+
+## Staggering Multiple Posts
+
+When publishing multiple posts in one session, **never** publish them all at the same timestamp. Stagger them to look organic:
+
+- **2 posts:** 4-8 hours apart
+- **3 posts:** spread across 2-3 different days
+- **4+ posts:** spread across 3-5 days, max 2 per day
+
+Use the `createdAt` parameter on `create_post` to set different publish dates. Pick realistic times (not 3am unless the persona is a night owl). Good defaults:
+- Morning posts: 08:00-10:00 UTC
+- Afternoon posts: 14:00-16:00 UTC
+- Evening posts: 19:00-21:00 UTC
+
+Example for 3 posts published today (March 29):
+```
+Post 1: createdAt = "2026-03-27T09:30:00Z"
+Post 2: createdAt = "2026-03-28T15:00:00Z"
+Post 3: createdAt = "2026-03-29T11:00:00Z"
+```
+
+Different personas should post at different times. Dont have techwizardrino and romanking both post at 9am.
 
 ## Available Tags
 

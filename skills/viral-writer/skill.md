@@ -277,8 +277,11 @@ Show:
 - **Persona:** username (and why)
 - **Title:** the title
 - **Tags:** suggested tag slugs
+- **Publish date:** suggested `createdAt` timestamp (staggered if multiple posts)
 - **Body:** full HTML
 - **Quality notes:** any flags from the checklist
+
+When presenting multiple posts, always stagger the publish dates across different days and times. Never publish all posts at the same timestamp. See `/webmatrices:publish-post` for staggering rules.
 
 Ask for approval or edits. On approval, hand off to `/webmatrices:publish-post`.
 
