@@ -1,6 +1,6 @@
 ---
 name: viral-writer
-description: Write viral content for Webmatrices using the full rulebook. Handles persona voice, banned patterns, authenticity markers, hook engineering, and emotional pacing. Use when asked to write a viral post, create content from a topic, or draft an article.
+description: Write viral content for Webmatrices using the full rulebook. Use when asked to write a viral post, create viral content, or draft an article with persona voice.
 disable-model-invocation: true
 argument-hint: [persona] [topic-or-idea]
 ---
