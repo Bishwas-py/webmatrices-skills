@@ -1,7 +1,7 @@
 # Content Engine — Shared Reference
 
 Shared research workflows and content patterns used by multiple skills.
-Referenced by: trending-topics, smart-reply
+Referenced by: trending-topics, viral-writer, simulate-engagement
 
 ## 1. Subreddit Mapping
 

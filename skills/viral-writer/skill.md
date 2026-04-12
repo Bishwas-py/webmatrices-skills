@@ -1,15 +1,18 @@
 ---
 name: viral-writer
-description: Write viral content for Webmatrices using the full rulebook. Use when asked to write a viral post, create viral content, or draft an article with persona voice.
+description: Write viral content for Webmatrices and publish it. Handles writing, publishing via MCP, and engagement-ready content design. Use when asked to write a viral post, create viral content, publish an article, or seed content as a persona.
 disable-model-invocation: true
 argument-hint: [persona] [topic-or-idea]
 ---
 
 # Viral Writer
 
-Write viral content for Webmatrices following the compiled rulebook. This skill handles voice, structure, and authenticity. For topic discovery, use `trending-topics` first, then hand off here.
+Write viral, engagement-ready content for Webmatrices and publish it. This skill handles voice, structure, authenticity, publishing via MCP, and designing content that naturally attracts organic engagement.
 
+For topic discovery, use `trending-topics` first, then hand off here.
 For persona registry and audience matching, see the [audience-matcher skill](../audience-matcher/skill.md).
+For engagement psychology and organic patterns, see [engagement-psychology.md](../_shared/engagement-psychology.md).
+For reply quality patterns, see [reply-patterns.md](../_shared/reply-patterns.md).
 
 ## Arguments
 
@@ -215,6 +218,51 @@ Reddit gives you the THEME. The persona provides the STORY. Those are two comple
 
 ---
 
+## ENGAGEMENT-READY CONTENT DESIGN
+
+Every post written by this skill should be designed to naturally attract comments. This connects viral-writer output with `/webmatrices:simulate-engagement`.
+
+For the full psychology behind these patterns, see [engagement-psychology.md](../_shared/engagement-psychology.md).
+
+### The Gap Principle
+
+Dont write complete, exhaustive posts. Leave deliberate openings for commenters:
+
+- **One missing angle** — cover 3 of 4 perspectives, leave the 4th for a commenter to supply
+- **One debatable claim** — include a take thats defensible but not bulletproof. Correction comments are 3-4x longer than agreement comments.
+- **Specificity that invites comparison** — "my site gets 1,200 sessions/month mostly from Pinterest" invites others to share their own numbers
+- **End with a genuine question** — not engagement bait ("what do you think? 👇") but a real question the persona actually wants answered: "anyone else seeing this pattern or is it just my niche?"
+
+### Engagement Hooks by Type
+
+| Hook | What it attracts | Example |
+|------|-----------------|---------|
+| **Vulnerable question** | Helpers, lurkers breaking silence | "am i the only one whose adsense rpm tanked after the march update?" |
+| **Specific personal number** | People comparing their own data | "i made $47.23 last month from 1,200 sessions" |
+| **Slightly wrong take** | Correctors (longest, most detailed comments) | "honestly i think backlinks are dead for small sites" |
+| **Narrow situation** | People in the exact same boat | "8-month-old blog, 23 posts, stuck at 500 sessions" |
+| **Named pattern** | Status signalers wanting to add their own framework | "i call it the Control Tax" |
+| **Unpopular opinion** | Second dissenters who felt alone | "vibe coding made me a worse developer" |
+
+### The Engagement Blueprint
+
+When presenting a draft, also output an **engagement blueprint**. This tells simulate-engagement how to follow up on this specific post:
+
+```
+ENGAGEMENT BLUEPRINT:
+- Trigger type: [correction / recognition / status-signal / emotional-vent]
+- Gap left: [specific angle not covered]
+- Debatable claim: [the intentionally imperfect take, paragraph number]
+- Suggested first comment: [persona] [type: agree+add / disagree / tangent / question] (~Xmin after post)
+- Suggested second comment: [persona] [type] (~Xhrs after first)
+- Suggested tangent: [persona] [adjacent topic] (next day)
+- Distribution: 70% agree / 20% pushback / 10% tangent
+```
+
+This blueprint is a suggestion. simulate-engagement may modify it based on current platform state.
+
+---
+
 ## HOOK ENGINEERING
 
 | Hook Type | Example | Why It Works |
@@ -294,6 +342,7 @@ If the topic needs current data:
 3. **Body** — follow emotional pacing, mix paragraph lengths, one metaphor max
 4. **Closing** — statement, not question. Unless persona demands a question (warmreboot).
 5. **Format** — HTML: `<p>`, `<h2>`, `<strong>`, `<ol>`, `<ul>`, `<blockquote>`
+6. **Engagement design** — apply the Gap Principle. Leave one angle uncovered, include one debatable claim, end with genuine question.
 
 ### Step 4: Quality check
 
@@ -314,6 +363,8 @@ Run every draft through this checklist:
 - [ ] No glazing anywhere.
 - [ ] 1-2 subtle imperfections (dropped apostrophe, missing article).
 - [ ] Source laundering check. Zero mentions of subreddit names, upvote counts, or "trending on Reddit/HN". All insights owned by the persona.
+- [ ] Gap Principle applied. At least one angle deliberately left uncovered.
+- [ ] One debatable claim present for correction-trigger engagement.
 
 ### Step 5: Present to user
 
@@ -324,10 +375,59 @@ Show:
 - **Publish date:** suggested `createdAt` timestamp (staggered if multiple posts)
 - **Body:** full HTML
 - **Quality notes:** any flags from the checklist
+- **Engagement blueprint:** suggested follow-up engagement plan
 
-When presenting multiple posts, always stagger the publish dates across different days and times. Never publish all posts at the same timestamp. See `/webmatrices:publish-post` for staggering rules.
+When presenting multiple posts, always stagger the publish dates across different days and times. Never publish all posts at the same timestamp.
 
-Ask for approval or edits. On approval, hand off to `/webmatrices:publish-post`.
+Ask for approval or edits.
+
+### Step 6: Publish via MCP
+
+On approval, use `create_post` with:
+- `authorId`: the persona's user ID
+- `title`: lowercase, punchy
+- `body`: full HTML content
+- `tagSlugs`: relevant tag slugs (e.g., `["google-adsense", "digi-work"]`)
+- `createdAt`: ISO date string (staggered for multiple posts)
+
+Display the result (post ID, slug).
+
+The MCP `create_post` tool automatically:
+- Runs content moderation (`guardContent`)
+- Generates unique slugs
+- Updates tag counts
+- Creates audit logs
+
+### Staggering Multiple Posts
+
+When publishing multiple posts in one session, stagger to look organic:
+
+- **2 posts:** 4-8 hours apart
+- **3 posts:** spread across 2-3 different days
+- **4+ posts:** spread across 3-5 days, max 2 per day
+
+Pick realistic times (not 3am unless the persona is a night owl):
+- Morning posts: 08:00-10:00 UTC
+- Afternoon posts: 14:00-16:00 UTC
+- Evening posts: 19:00-21:00 UTC
+
+Different personas should post at different times. Dont have techwizardrino and romanking both post at 9am.
+
+## Available Tags
+
+Use `list_tags` to get current tags. Common ones:
+- `google-adsense` — AdSense topics
+- `digi-work` — Freelancing/Fiverr/Upwork
+- `programming` — Coding/tech
+- `ai-founder` — AI tools/startups
+- `sveltekit` — SvelteKit framework
+- `django` — Django framework
+
+## Important
+
+- Always verify the persona exists and is active before publishing
+- Show the draft for approval before creating
+- The engagement blueprint is a suggestion for `/webmatrices:simulate-engagement`, not a requirement
 
 ---
 

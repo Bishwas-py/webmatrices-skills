@@ -6,14 +6,15 @@ Claude Code plugin for managing the [Webmatrices](https://webmatrices.com) commu
 
 | Skill | Command | Description |
 |-------|---------|-------------|
+| viral-writer | `/webmatrices:viral-writer [persona] [topic]` | Write viral content and publish it as a persona via MCP |
+| simulate-engagement | `/webmatrices:simulate-engagement [post-slug]` | Orchestrate organic-looking engagement with timing, persona rotation, and comment diversity |
+| detect-fake-engagement | `/webmatrices:detect-fake-engagement [scope]` | Audit existing engagement for AI tells, timing anomalies, and suspicious patterns |
+| trending-topics | `/webmatrices:trending-topics` | Fetch trending topics for the audience |
 | spam-scanner | `/webmatrices:spam-scanner` | Scan for spam posts, soft-delete them, ban spammers |
 | ban-user | `/webmatrices:ban-user <id>` | Ban a user by ID, username, or email |
 | create-persona | `/webmatrices:create-persona <username>` | Create a persona account for content seeding |
-| publish-post | `/webmatrices:publish-post <username> <topic>` | Write and publish a post as a persona |
-| trending-topics | `/webmatrices:trending-topics` | Fetch trending topics for the audience |
 | audience-matcher | *(auto-invoked)* | Match topics to the best persona |
 | find | `/webmatrices:find <query>` | Search posts, users, tags, and analytics with natural language |
-| smart-reply | `/webmatrices:smart-reply <post-slug> [persona]` | Draft a researched reply to a post or comment using the right persona voice |
 
 ## Install
 
