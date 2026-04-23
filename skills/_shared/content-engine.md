@@ -68,7 +68,7 @@ After extracting claims from Reddit:
 
 ## 4. Viral Content Patterns
 
-These patterns are derived from analysis of all Webmatrices posts (REPORT.md) and bishwasbhn's Reddit performance (3,836 karma, top posts 600-1500+ upvotes).
+These patterns are derived from analysis of all Webmatrices posts (REPORT.md) and the admin's Reddit performance (3,836 karma, top posts 600-1500+ upvotes).
 
 ### What works
 

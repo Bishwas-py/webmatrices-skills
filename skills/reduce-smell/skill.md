@@ -117,7 +117,7 @@ Review the changes, then:
 
 ## FIX STRATEGIES BY FLAG TYPE
 
-### Authenticity fixes
+### Surface authenticity fixes
 
 | Flag | Fix strategy |
 |------|-------------|
@@ -126,11 +126,36 @@ Review the changes, then:
 | AI vocabulary | Replace with the persona's natural word choices from their writing samples |
 | ChatGPT openers | Delete entirely, start with the actual content |
 | Performed emotions | Replace announced emotion with specific mundane detail |
-| Uniform quality | Tighten the important sections, loosen the filler sections |
 | Missing mid-thought correction | Insert a natural backtrack at a place where the persona might reconsider |
 | Apostrophe mismatch | Replace all instances to match the persona's DB pattern |
 | Emojis in h2 | Remove all emojis from subheadings |
 | Backstory contradiction | Rewrite to align with established backstory, or reframe as the persona updating their view |
+
+### Deep authenticity fixes (THE THIN LINE)
+
+These are the structural fixes that separate "approximating" a persona from "inhabiting" them.
+
+| Flag | Fix strategy |
+|------|-------------|
+| POLITE STRANGER | Rewrite the flagged sections using specific details from the persona's `backstory` in DB. Replace generic observations with details only THIS persona would know. Not "I worked on a project" but the specific project from their backstory (fetch from DB). Load their writing samples and match the rhythm. |
+| EARNED OPINIONS | Trace the opinion back to the persona's backstory. If the persona says "vibe coding is dangerous," add the specific experience from their DB backstory that EARNED them that view. If no backstory supports the opinion, either add backstory context via `update_persona` MCP or soften the claim to speculation. |
+| UNIFORM QUALITY / INVESTMENT MAP | Identify which section the persona cares most about (from their topics in DB). Tighten THAT section — shorter sentences, stronger verbs, more precise language. Then deliberately LOOSEN 1-2 other sections — longer sentences, more qualifiers, trailing thoughts. The quality variation should map to emotional investment. |
+| THINKING PROCESS MISSING | Insert a visible reasoning journey. Not "The answer is X." but "I initially thought X. Then I looked at Y. Actually, Z might be closer to the truth." Place this at the natural inflection point of the argument — where the persona would genuinely reconsider. |
+| TEMPLATE / GENERIC CONTENT | The hardest fix. If the content could work for any persona with minor voice changes, the problem is the CONTENT not the VOICE. Options: (a) Add a backstory-specific anecdote that only this persona could tell, (b) Reframe the argument through this persona's unique professional lens, (c) Add a specific number or detail from their backstory that grounds the abstract argument. |
+| UNSAID / OVEREXPLAINING | Delete explanations the audience already knows. If writing for Webmatrices devs, cut "AdSense is Google's ad program." If writing for freelancers, cut "MRR means monthly recurring revenue." Trust the community's shared context. |
+| TOO GOOD / TOO POLISHED | Introduce deliberate imperfection that matches the persona's style. For a confessional persona: shorter paragraphs, more fragments, one trailing "..." thought. For a data-backed persona: one self-correction mid-thought. For an uncertain persona: one unanswered question. Match the specific imperfection to the persona's voice from their DB traits. |
+
+### Persona trait fixes
+
+When `/smell` flags that the persona's TRAITS THEMSELVES are smelly (inconsistent backstory, contradicting details across posts, drifting apostrophe patterns), use the `update_persona` MCP tool to fix the source:
+
+```
+update_persona MCP:
+  userId: [persona ID]
+  personaTraits: '{"backstory":{"location":"Lisbon (updated from Chicago)"}}'
+```
+
+This fixes the root cause rather than just fixing individual posts. After updating traits, re-run `/smell` on the persona's recent posts to check for new inconsistencies.
 
 ### Factual fixes
 

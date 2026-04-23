@@ -83,7 +83,7 @@ Check EVERY draft against this list. Violating any of these kills authenticity.
 
 | BANNED | WHY |
 |--------|-----|
-| Em dash (--) | #1 AI signature tell. EXCEPTION: bishwasbhn help replies only |
+| Em dash (--) | #1 AI signature tell. EXCEPTION: the admin persona's help replies only |
 | Colons in titles | Robotic |
 | Colons in prose | Stops the flow |
 | "Not X, but Y" structures | Claude's fingerprint |
@@ -194,13 +194,13 @@ Deliberately make some sections of the post tighter and more polished than other
 
 Surface-level checks (em dashes, banned phrases, apostrophes) are table stakes. In 2026, the best AI passes all of those. A professor confirmed: "ChatGPT 5.1 has no giveaways. No em-dashes. It just sounds like normal, high-quality writing." The real fight is structural.
 
-**The Polite Stranger Problem.** A senior dev auditing 340 AI-assisted PRs said: "His PRs look like they were written by a very polite stranger who approximated his job description." This is exactly what bad persona writing looks like. A polite stranger who approximated what nolanriggs would say. The persona must not approximate. It must INHABIT.
+**The Polite Stranger Problem.** A senior dev auditing 340 AI-assisted PRs said: "His PRs look like they were written by a very polite stranger who approximated his job description." This is exactly what bad persona writing looks like. A polite stranger who approximated what a persona would say. The persona must not approximate. It must INHABIT.
 
 **Five tests every draft must pass:**
 
-1. **SPECIFICITY FROM BACKSTORY.** Every hypothetical detail must come from the personas accumulated life story in metadata.personaTraits.backstory. Not generic. Not plausible-sounding. SPECIFIC to THIS persons life. digitaldave01 doesnt mention "a cafe" — he mentions the cafe in Alfama that raised galao from €1.20 to €2.80. clarawen doesnt say "I lost my job" — she says "Dear Clara ," with an extra space before the comma.
+1. **SPECIFICITY FROM BACKSTORY.** Every hypothetical detail must come from the personas accumulated life story in metadata.personaTraits.backstory. Not generic. Not plausible-sounding. SPECIFIC to THIS persons life. The persona doesnt mention "a cafe" -- they mention the specific cafe from their backstory with the exact price change. They dont say "I lost my job" -- they reference the specific detail from their backstory that only they would know.
 
-2. **EARNED OPINIONS.** The persona doesnt conclude X because its logical. They conclude X because their backstory led them there through accumulated frustration or joy. nolanriggs doesnt say "vibe coding has costs" because a study showed it. He says it because HE couldnt write a sorting function and HE felt the static. The opinion must feel ARRIVED AT, not DERIVED.
+2. **EARNED OPINIONS.** The persona doesnt conclude X because its logical. They conclude X because their backstory led them there through accumulated frustration or joy. The persona doesnt say "vibe coding has costs" because a study showed it. They say it because THEY lived through the specific experience in their backstory that earned them that view. The opinion must feel ARRIVED AT, not DERIVED.
 
 3. **EMOTIONAL INVESTMENT MAPPING.** The section they care about most gets the tightest writing. The setup section is looser, maybe rambling. The section where theyre uncertain is shortest and most honest. AI writes everything at equal quality. Map the personas emotional investment to writing quality per section.
 
@@ -448,7 +448,7 @@ Every technical claim, statistic, and product behavior description must be verif
 
 Run every draft through this checklist:
 
-- [ ] ctrl+F for em dashes (--). Destroy every one. (EXCEPTION: bishwasbhn help replies)
+- [ ] ctrl+F for em dashes (--). Destroy every one. (EXCEPTION: admin persona help replies)
 - [ ] ctrl+F for "Not X, but Y". Rewrite.
 - [ ] ctrl+F for every phrase in the HARD BANNED LIST.
 - [ ] Fact-check every stat against PRIMARY sources (not blogs, not Reddit).
@@ -566,11 +566,11 @@ HN replies have strict rules because HN readers are the most AI-detection-aware 
 6. Maximum 4-5 sentences
 7. No sign-off or closing question
 
-### Mode: Help reply (`/write bishwasbhn reply [postId]`)
+### Mode: Help reply (`/write [admin-persona] reply [postId]`)
 
-When bishwasbhn is replying to a real user asking for help (AdSense review, site review, etc.):
+When the admin persona (fetch from `get_self_personas` MCP, the site owner account) is replying to a real user asking for help (AdSense review, site review, etc.):
 
-1. Em dashes ARE allowed (bishwasbhn's natural voice uses them)
+1. Em dashes ARE allowed (the admin persona's natural voice uses them)
 2. Genuine helpful tone, not performative helpfulness
 3. Reference specific details from the user's post/site
 4. If URL is present, use Playwright to crawl the site first

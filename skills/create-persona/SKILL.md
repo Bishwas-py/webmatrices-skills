@@ -45,13 +45,7 @@ When creating a persona, match these conventions:
 
 ## Existing Persona Styles (reference)
 
-| Persona | Voice | Topics |
-|---------|-------|--------|
-| techwizardrino | tech/dev, slightly casual, real numbers | AI tools, AdSense, coding |
-| digitaldave01 | SEO/marketing, practical, tool-focused | SEO tools, AI predictions |
-| romanking | sharp, punchy, slightly cynical | vibe coding, workplace AI |
-| serpsherpa | storytelling, SEO practitioner | backlinks, client stories, SEO strategy |
-| warmreboot | first-person, anxious dev, uses real numbers | AdSense, web dev, monetization |
+Fetch existing personas from `get_self_personas` MCP to check for voice/topic overlap before creating a new one. Each persona includes `metadata.personaTraits` with voice, topics, opinion strength, and backstory. Use this data to ensure the new persona fills a gap rather than duplicating an existing voice or topic area.
 
 ## Workflow
 

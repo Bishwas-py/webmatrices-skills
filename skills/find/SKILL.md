@@ -32,7 +32,7 @@ Parse the natural language input and map to the right MCP tool(s):
 | `"posts containing whatsapp"` | `search_posts_by_content` | `pattern: "whatsapp"` |
 | `"recent posts"`, `"latest posts"` | `list_posts` | `sortBy: "createdAt"` |
 | `"deleted posts"` | `list_posts` | `filter: "deleted"` |
-| `"posts by user 19150"` | `list_posts` | `authorId: 19150` |
+| `"posts by user [userId]"` | `list_posts` | `authorId: [userId]` |
 
 ### User queries
 
@@ -87,7 +87,7 @@ Present results as clean markdown tables:
 /webmatrices:find "fiverr posts"
 /webmatrices:find "banned users"
 /webmatrices:find "posts containing whatsapp"
-/webmatrices:find "user @techwizardrino"
+/webmatrices:find "user @[username]"
 /webmatrices:find "platform stats"
 /webmatrices:find "top tags"
 ```

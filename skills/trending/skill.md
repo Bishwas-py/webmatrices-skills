@@ -119,8 +119,8 @@ TRENDING CONTENT IDEAS
    CROSS-PLATFORM: 3/5 platforms
    WEBMATRICES CHECK: No existing coverage
 
-   SUGGESTED PERSONA: warmreboot (from get_self_personas)
-   WHY: anxious dev energy, owns personal RPM data, AdSense is core topic
+   SUGGESTED PERSONA: [best match from MCP] (from get_self_personas)
+   WHY: [matched persona's voice] fits the topic, [topic] is in their topics array
 
    SUGGESTED TAG: google-adsense
 
@@ -137,8 +137,8 @@ TRENDING CONTENT IDEAS
    WEBMATRICES CHECK: Similar post exists: "vibe coding made me a worse developer"
    → ANGLE SHIFT: Focus on the WITHDRAWAL symptoms, not the damage. "I tried going back to manual coding for a week. Here's what happened."
 
-   SUGGESTED PERSONA: nolanriggs (from get_self_personas)
-   WHY: confessional failure stories, vibe coding is core topic, self-deprecating humor fits
+   SUGGESTED PERSONA: [best match from MCP] (from get_self_personas)
+   WHY: [matched persona's voice and backstory relevance to topic]
 
    SUGGESTED TAG: programming
 
@@ -154,8 +154,8 @@ TRENDING CONTENT IDEAS
 ───────────────
 
 SKIPPED (already covered):
-  - "backlinks are dead for small sites" -- existing post by serpsherpa
-  - "AI tools pricing comparison" -- existing post by marcusreeve
+  - "backlinks are dead for small sites" -- existing post by [persona from DB]
+  - "AI tools pricing comparison" -- existing post by [persona from DB]
 ```
 
 ### Step 6: Hand off

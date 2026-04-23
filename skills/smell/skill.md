@@ -95,7 +95,7 @@ Severity: HIGH
 
 **2. The Earning Test.**
 "Did this persona EARN this opinion through their backstory, or did they arrive at it logically?"
-Check the personas backstory in metadata.personaTraits.backstory. If the opinion expressed has no foundation in their accumulated experience, its derived (AI pattern) not earned (human pattern). nolanriggs saying "vibe coding atrophied my brain" is earned — he built 4 apps with $0 revenue and couldnt write a sorting function. If a persona with no relevant backstory suddenly has strong opinions on a topic, thats a smell.
+Check the personas backstory in metadata.personaTraits.backstory. If the opinion expressed has no foundation in their accumulated experience, its derived (AI pattern) not earned (human pattern). A persona saying "vibe coding atrophied my brain" is earned if their backstory includes specific experiences that led to that conclusion. If a persona with no relevant backstory suddenly has strong opinions on a topic, thats a smell.
 Severity: HIGH
 
 **3. The Investment Map Test.**
@@ -110,7 +110,7 @@ Severity: MEDIUM
 
 **5. The Template Test.**
 "Could a different persona have written this with minor voice changes?"
-If you could swap the apostrophe pattern and signature phrases and the content would work for romanking OR nolanriggs OR digitaldave01, the content is GENERIC with voice applied. The content must be SPECIFIC to this personas life, their backstory, their accumulated experience. If its interchangeable, flag it.
+If you could swap the apostrophe pattern and signature phrases and the content would work for persona A OR persona B OR persona C, the content is GENERIC with voice applied. The content must be SPECIFIC to this personas life, their backstory, their accumulated experience. If its interchangeable, flag it.
 Severity: HIGH
 
 **6. The Unsaid Test.**
@@ -177,7 +177,7 @@ Detects structural problems that weaken content regardless of authenticity.
 |--------|----------|-----------------|
 | Shared examples | HIGH | Two personas referencing the same specific detail |
 | Echoed phrasing | HIGH | Two personas using the same distinctive phrase |
-| Voice bleed | HIGH | digitaldave01 using techwizardrino's verbal tics |
+| Voice bleed | HIGH | one persona using another persona's verbal tics |
 | Cross-persona vocabulary | HIGH | Persona using another persona's signature phrases |
 | Identical opinion patterns | MEDIUM | All personas agree on everything |
 | Knowledge staggering failure | MEDIUM | All commenters know the same things at the same level |
@@ -224,6 +224,51 @@ Fetch all of the user's recent posts via `list_posts` with `authorId`, then:
 - Is the persona commenting at realistic hours for their implied timezone?
 - Do they have silent days? (No silent days = bot energy)
 - Are they overexposed? (More than 4-5 comments per day)
+
+### Backstory Smell (meta-level: does the backstory ITSELF feel manufactured?)
+
+Fetch the persona's `metadata.personaTraits.backstory` from DB and check:
+
+**0. Internal Consistency Test.**
+Check the backstory fields against EACH OTHER for contradictions that cant coexist. Examples:
+
+CONTRADICTORY (flag):
+- location: "London, UK" + timeline: "born and raised in USA, never left"
+- career: "freelancer for 8 years" + timeline: "started freelancing last year"
+- age: "39" + timeline: "15 years experience since age 18" (= 33, not 39)
+- income: "$78,000/year" + struggles: "cant afford $900 rent"
+
+NOT CONTRADICTORY (dont flag):
+- location: "London, UK" + timeline: "born in USA, moved to UK in 2013" (migration explains it)
+- career: "product manager" + posts about coding (PMs can code on the side)
+- income dropped from "$4,500/month" to "$3,800/month" (income changes over time are real)
+
+The key is TIMELINE. If the backstory has a timeline that explains how contradictory-looking facts coexist (moved, changed careers, income changed), thats genuine. If two facts cant coexist at the same point in time with no timeline bridging them, thats a flag.
+
+Check: location vs timeline, age vs experience years, income vs stated struggles, career vs stated skills. Cross-reference every field pair.
+Severity: HIGH
+
+**1. Character Sheet Test.**
+Does the backstory read like a neat character sheet (clean categories, organized timeline, every detail serves a purpose) or like a real life (gaps, irrelevant details, unresolved threads, years they skip over)? If every backstory element is narratively useful, its too clean. Real people have skills and history that are IRRELEVANT to what they write about.
+Severity: MEDIUM
+
+**2. Convenience Test.**
+Does every struggle in the backstory perfectly set up the persona's content? If a persona writes about AdSense and their backstory is "struggled with AdSense for 14 months," thats convenient. Real people have struggles that have NOTHING to do with their expertise. A missing irrelevant detail ("moved cities for a relationship that didnt work out," "spent a year doing something completely different") makes the backstory feel lived.
+Severity: MEDIUM
+
+**3. Round Number Test.**
+"14 years experience" and "$78,000 income" are suspiciously precise-yet-round. Real people say "about 14 years" or "started around 2011, so whatever that is now." Check for numbers that are too clean. Note: some round numbers are fine in isolation. Its a smell when ALL numbers are round.
+Severity: LOW
+
+**4. Missing Mundane Test.**
+Does the backstory have boring details that serve no narrative purpose? Real bios include things like: moved for a job they ended up hating, took time off for no dramatic reason, have a hobby completely unrelated to their work, own something specific and pointless (11 dictionaries, a broken espresso machine). If every detail is dramatic or useful, the backstory is too curated.
+Severity: MEDIUM
+
+**5. Growth Test.**
+Does the backstory show the persona CHANGING over time? Real people contradict their younger selves. A persona who has always held the same views is suspicious. Look for: "I used to think X but now I think Y" or opinions that evolved through specific experiences. Static backstories = manufactured. Growing backstories = lived.
+Severity: MEDIUM
+
+When backstory issues are found, flag them and recommend using `update_persona` MCP to add messiness, irrelevant details, growth arcs, and un-round numbers.
 
 ---
 
@@ -283,7 +328,7 @@ THREAD SMELL:
 ### User Scan
 
 ```
-USER SMELL: @techwizardrino
+USER SMELL: @[username]
 Posts scanned: 12 | Comments scanned: 34
 ═══════════════════════════════════════
 

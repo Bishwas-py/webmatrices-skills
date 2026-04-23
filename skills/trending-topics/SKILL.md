@@ -96,11 +96,9 @@ Present findings: "here's what checked out, here's what didn't, here's new data 
 ### Step 6: Draft the post
 
 1. **Pick persona** — use audience-matcher logic:
-   - AdSense topic → warmreboot or techwizardrino
-   - SEO topic → serpsherpa or digitaldave01
-   - Web dev / AI → romanking or bishwasbhn
-   - Hot take → romanking
-   - Fiverr → simonokimo or techwizardrino
+   - Fetch all personas from `get_self_personas` MCP
+   - Match topics to personas by comparing against each persona's `metadata.personaTraits.topics` array
+   - Score by topic relevance, voice fit, and backstory relevance using audience-matcher logic
 
 2. **Apply viral patterns** from content-engine.md:
    - Jagged number in title

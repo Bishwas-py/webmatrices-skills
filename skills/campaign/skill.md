@@ -19,13 +19,13 @@ DRAFT → PREVIEWED → SENT
 
 | State | What happened | What can happen next |
 |-------|-------------|---------------------|
-| DRAFT | Email content built, segments chosen | /campaign preview (sends to bishwasbhn only) |
-| PREVIEWED | bishwasbhn received the test email | /campaign send (fires to full audience) |
+| DRAFT | Email content built, segments chosen | /campaign preview (sends to the site owner only) |
+| PREVIEWED | The site owner received the test email | /campaign send (fires to full audience) |
 | SENT | Email delivered to segments | Done |
 
 **Rules:**
 - `/campaign [anything]` = always starts in DRAFT state. Never sends.
-- `/campaign preview` = sends to bishwasbhn ONLY. Moves to PREVIEWED.
+- `/campaign preview` = sends to the site owner ONLY (fetch admin user from `get_self_personas` MCP). Moves to PREVIEWED.
 - `/campaign send` = fires to full segments. If NOT previewed first, asks "Are you sure you want to send without previewing? This will go to [N] users."
 - You can re-draft at any point. Going back to DRAFT resets the state.
 
@@ -109,7 +109,7 @@ Call `get_self_personas` MCP to get the list of internal persona IDs. Add all of
 - Max 1 link per paragraph.
 - Inline links with arrows: `<a href="url">Post title →</a>`
 - Brief 1-2 sentence teaser per post, NOT the full excerpt
-- Personal tone from bishwasbhn (first person, lowercase)
+- Personal tone from the site owner (first person, lowercase)
 
 **CTA button with Gmail white text fix:**
 
@@ -140,7 +140,7 @@ Gmail sometimes renders white text on white buttons. Always wrap CTA button text
 
 [CTA button]
 
-<p>- bishwas</p>
+<p>- [site owner's first name, fetch from MCP]</p>
 ```
 
 ### Step 5: Present the DRAFT
@@ -152,7 +152,7 @@ Show the complete email:
 - Full HTML body
 - STATE: DRAFT
 
-Ask: "Ready to preview? Run `/campaign preview` to send a test to bishwasbhn."
+Ask: "Ready to preview? Run `/campaign preview` to send a test to the site owner."
 
 **NEVER auto-send. NEVER proceed past DRAFT without user action.**
 
@@ -160,11 +160,12 @@ Ask: "Ready to preview? Run `/campaign preview` to send a test to bishwasbhn."
 
 ## SUBCOMMAND: /campaign preview
 
-1. Send the email to bishwasbhn ONLY using `send_targeted_email` MCP with:
-   - Recipient limited to bishwasbhn's email
+1. Fetch the admin user from `get_self_personas` MCP (the site owner account)
+2. Send the email to the site owner ONLY using `send_targeted_email` MCP with:
+   - Recipient limited to the site owner's email
    - Full email body as built in the draft
-2. Move state to PREVIEWED
-3. Tell the user: "Test email sent to bishwasbhn. Check your inbox. When ready: `/campaign send`"
+3. Move state to PREVIEWED
+4. Tell the user: "Test email sent to the site owner. Check your inbox. When ready: `/campaign send`"
 
 ---
 
@@ -193,8 +194,8 @@ Before ANY send (preview or full):
 - [ ] Max 1 link per paragraph
 - [ ] CTA button has span wrapper for Gmail white text fix
 - [ ] No competitor links in the email
-- [ ] Personal tone (from bishwasbhn, not corporate)
-- [ ] Preview sent to bishwasbhn before full send (or explicit override)
+- [ ] Personal tone (from the site owner, not corporate)
+- [ ] Preview sent to the site owner before full send (or explicit override)
 
 ---
 

@@ -88,14 +88,14 @@ Return:
 MATCH RESULT:
 Topic: "AdSense RPM tanking after March 2026 core update"
 
-Primary: warmreboot (ID from MCP)
+Primary: [matched persona from MCP] (ID from MCP)
   Score: 0.91
-  Why: AdSense is core topic, anxious dev voice fits RPM anxiety,
-       hasn't posted in 3 days, backstory includes personal AdSense sites
+  Why: [topic] is in their topics array, [voice description] fits the topic's tone,
+       hasn't posted in 3 days, backstory includes relevant experience
 
-Runner-up: danivoss (ID from MCP)
+Runner-up: [second-best match from MCP] (ID from MCP)
   Score: 0.72
-  Why: AdSense alternatives is core topic, but calm veteran voice
+  Why: [adjacent topic] is in their topics array, but [voice description]
        is less urgent than the topic demands
 
 Segment: AdSense
