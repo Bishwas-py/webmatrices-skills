@@ -56,11 +56,6 @@ FLAG [HIGH]: Uniform section quality
 FIX: Tighten section 2 (the core argument -- this is what the persona cares about).
      Loosen section 4 (supporting context -- let this feel more rushed, shorter paragraphs, less polished).
 
-FLAG [MEDIUM]: Apostrophe pattern mismatch
-BEFORE: "don't", "can't", "won't" (throughout)
-AFTER: "dont", "cant", "wont" (matching persona's established pattern from DB)
-Applied to: 7 instances across the post
-
 FLAG [HIGH]: Paragraph 4 and 8 repeat the same point
 FIX: Delete paragraph 8 entirely. Paragraph 4 already makes this point.
 
@@ -127,7 +122,7 @@ Review the changes, then:
 | ChatGPT openers | Delete entirely, start with the actual content |
 | Performed emotions | Replace announced emotion with specific mundane detail |
 | Missing mid-thought correction | Insert a natural backtrack at a place where the persona might reconsider |
-| Apostrophe mismatch | Replace all instances to match the persona's DB pattern |
+| Apostrophe mismatch | Informational only — do not fix. Natural drift is expected and tolerated. |
 | Emojis in h2 | Remove all emojis from subheadings |
 | Backstory contradiction | Rewrite to align with established backstory, or reframe as the persona updating their view |
 

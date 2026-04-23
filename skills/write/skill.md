@@ -129,15 +129,11 @@ Check EVERY draft against this list. Violating any of these kills authenticity.
 
 ## AUTHENTICITY MARKERS
 
-### Apostrophe Psychology
+### Apostrophe Patterns (soft preference, not strict)
 
-Real people are inconsistent. Match the persona's pattern from `metadata.personaTraits.writingSamples`:
+Apostrophe consistency is a SOFT preference. Natural drift is expected and tolerated. Do not treat apostrophe patterns as a strict rule — real people are inconsistent and their patterns shift with mood, formality, and speed of typing.
 
-- Skip apostrophes in very common contractions: `dont, cant, wont, theres, didnt, wasnt, Ive`
-- Keep them in less common ones: `she'd, they're, wouldn't`
-- Casual run-ons = fewer apostrophes
-- More formal sentences = more apostrophes
-- Check the persona's actual posts in DB to match their specific pattern
+When writing, glance at the persona's `metadata.personaTraits.apostrophes` pattern and lean toward it, but dont obsess over perfect consistency. A post that drops "dont" in one paragraph and writes "don't" in another is fine — thats how real people type.
 
 ### Typos (use sparingly, 1-2 max per post)
 
@@ -459,9 +455,9 @@ Run every draft through this checklist:
 - [ ] Count metaphors. Max one per post.
 - [ ] Verify ending is a statement, not a question (unless persona requires it).
 - [ ] Check for staccato shotgunning. Add compound sentences if needed.
-- [ ] Apostrophe consistency matches persona's DB pattern.
+- [ ] Apostrophe pattern loosely matches persona (soft check — natural drift is fine).
 - [ ] No glazing anywhere.
-- [ ] 1-2 subtle imperfections (dropped apostrophe, missing article).
+- [ ] 1-2 subtle imperfections (missing article, casual typo).
 - [ ] Source laundering check. Zero "someone said", "one person pointed out", "another commenter". All insights owned by the persona.
 - [ ] AI-detection resistance. At least one mid-thought correction or abandoned tangent. Varied section quality. No performed emotions.
 - [ ] Cross-persona check. If multiple personas engage on one post, no shared examples, no echoed phrasing, staggered knowledge levels.

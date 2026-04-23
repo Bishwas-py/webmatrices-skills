@@ -33,12 +33,9 @@ At the start of every simulate-engagement invocation:
 4. Use these traits for voice matching, NOT a static table
 5. Fetch each persona's recent activity via `list_posts` and `get_comments` to check activity levels
 
-### Apostrophe Patterns from DB
+### Apostrophe Patterns (soft preference)
 
-For each persona, their `metadata.personaTraits.writingSamples` contains their actual writing style. Match apostrophe usage from this data:
-- Some personas consistently skip apostrophes in common contractions (dont, cant, wont)
-- Some use them inconsistently
-- Match whatever pattern exists in their DB samples
+Apostrophe consistency is a soft preference, not a strict rule. Lean toward the persona's pattern from `metadata.personaTraits.apostrophes` but dont enforce it rigidly. Natural drift is expected — real people are inconsistent with apostrophes.
 
 ---
 
@@ -363,7 +360,7 @@ Before finalizing any engagement plan, verify:
 - [ ] Time-of-day is realistic for each persona (from MCP active hours)
 - [ ] Not every post in the scope got engagement (some should be skipped)
 - [ ] All comments pass /smell check with CLEAN score
-- [ ] Apostrophe patterns match each persona's DB writing samples
+- [ ] Apostrophe patterns loosely match persona (soft check — drift is fine)
 - [ ] `createdAt` timestamps are set, not defaulting to "now"
 
 ---

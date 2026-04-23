@@ -72,11 +72,9 @@ Compare current content against persona's `metadata.personaTraits.backstory` and
 - Is the emotion performed (announced) or shown (through specific details)?
 - Are there emotional shifts that feel unearned?
 
-#### Apostrophe Pattern
+#### Apostrophe Pattern (informational only — do NOT score against)
 
-- Fetch persona's `writingSamples` from MCP traits
-- Compare apostrophe usage in current content against their established pattern
-- Flag drift: if they usually skip apostrophes in "dont/cant/wont" but this content uses them consistently, thats a smell
+Apostrophe consistency is a SOFT signal, not a scoring factor. Note the pattern for context but do NOT flag apostrophe drift as a smell. Real people are inconsistent with apostrophes and their patterns shift naturally. Only mention apostrophes in the report as an informational note, never as a HIGH or MEDIUM flag.
 
 #### Hypothetical Realness
 
@@ -213,11 +211,9 @@ Fetch all of the user's recent posts via `list_posts` with `authorId`, then:
 - Do they reference conflicting personal details?
 - Has their professional context shifted without explanation?
 
-### Apostrophe Drift
+### Apostrophe Drift (informational only — do NOT score against)
 
-- Compare apostrophe patterns across posts over time
-- Real people are consistently inconsistent. They ALWAYS skip apostrophes in the same words.
-- If apostrophe usage changes dramatically between posts, thats a smell.
+Note apostrophe patterns for context but do NOT flag drift as a smell. Real people are inconsistent with apostrophes and shift patterns naturally over time. This is informational context, not a scoring factor.
 
 ### Activity Pattern
 
@@ -286,7 +282,7 @@ SCORE: [CLEAN / SMELLS OFF / REWRITE NEEDED]
 AUTHENTICITY FLAGS:
   [HIGH] Em dash found in paragraph 3: "the real problem -- and nobody..."
   [HIGH] Banned phrase: "Not X, but Y" in paragraph 5
-  [MEDIUM] Apostrophe pattern inconsistent with persona DB (using "don't" but persona pattern shows "dont")
+  [INFO] Apostrophe pattern note: using "don't" but persona leans toward "dont" (not scored)
 
 FACTUAL FLAGS:
   [FLAG] "Vercel stores env vars encrypted at rest" -- needs verification via /fact-check
@@ -306,8 +302,7 @@ DEEP AUTHENTICITY FLAGS:
 SUGGESTIONS:
   1. Remove em dash in paragraph 3 -- rewrite as two sentences
   2. Rewrite "Not X, but Y" in paragraph 5
-  3. Match apostrophe pattern to persona's established usage
-  4. Make section 2 tighter and section 5 looser (vary quality)
+  3. Make section 2 tighter and section 5 looser (vary quality)
   5. Run /fact-check on 2 flagged claims
   6. Add a backstory-specific detail from persona's DB (location, career, specific past experience)
   7. Show the thinking process: add a "I initially thought X but then..." moment
