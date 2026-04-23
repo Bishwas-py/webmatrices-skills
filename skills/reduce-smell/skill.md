@@ -147,15 +147,61 @@ These are the structural fixes that separate "approximating" a persona from "inh
 
 ### Persona trait fixes
 
-When `/smell` flags that the persona's TRAITS THEMSELVES are smelly (inconsistent backstory, contradicting details across posts, drifting apostrophe patterns), use the `update_persona` MCP tool to fix the source:
+When `/smell` flags that the persona's TRAITS THEMSELVES are smelly, use the `update_persona` MCP tool to fix the source.
+
+#### Internal backstory contradictions
+
+When two backstory fields contradict each other, decide which one to keep based on what the persona has already published. Then fix the other.
+
+**Strategy: Bridge with timeline, dont delete.**
+
+WRONG approach:
+```
+Contradiction: location says "London" but timeline says "born in USA, never left"
+Fix: delete location → set to "USA"
+```
+
+RIGHT approach:
+```
+Contradiction: location says "London" but timeline says "born in USA, never left"
+Fix: add migration event to timeline → "born in USA, moved to London in 2019 for work"
+     Now both facts coexist. The backstory gained a life event instead of losing one.
+```
+
+Always prefer ADDING a bridging event over DELETING a contradicting fact. Real people have complex histories. The fix should make the backstory MORE lived-in, not less.
 
 ```
 update_persona MCP:
   userId: [persona ID]
-  personaTraits: '{"backstory":{"location":"Lisbon (updated from Chicago)"}}'
+  personaTraits: '{"backstory":{"timeline":["...existing events...", "2019: moved to London for a contract that became permanent"]}}'
 ```
 
-This fixes the root cause rather than just fixing individual posts. After updating traits, re-run `/smell` on the persona's recent posts to check for new inconsistencies.
+#### Age vs experience math
+
+If age and experience years dont add up (e.g. "39 years old" + "15 years experience since college" = started at 24, graduated at 24, plausible). But "29 years old" + "15 years experience" = started at 14, suspicious.
+
+Fix: adjust whichever number the persona has referenced LESS in published posts. If theyve mentioned their age in 3 posts but experience years in 1 post, adjust the experience years.
+
+#### Income vs struggles mismatch
+
+If income is high but the persona claims financial struggles, add CONTEXT that explains it: student loans, supporting family, expensive city, divorce, medical bills. Dont just lower the income — real people can earn well and still struggle.
+
+#### Backstory too clean (character sheet / convenience / missing mundane)
+
+When `/smell` flags the backstory as too manufactured:
+
+1. Add one IRRELEVANT detail that has nothing to do with their content topics (a hobby, a past job in a different field, a city they lived in briefly)
+2. Add one UNRESOLVED thread (something they started and never finished, a question they still dont have an answer to)
+3. Make one number less round ("14 years" → "started in 2012, so whatever that is now")
+4. Add one growth moment ("I used to think X but changed my mind after Y")
+
+```
+update_persona MCP:
+  userId: [persona ID]
+  personaTraits: '{"backstory":{"tools":["...existing...", "used to play guitar, sold it during a move"], "struggles":["...existing...", "still havent figured out health insurance properly"]}}'
+```
+
+After ANY trait update, re-run `/smell` on the persona's recent posts to check for new inconsistencies between the updated backstory and published content.
 
 ### Factual fixes
 
