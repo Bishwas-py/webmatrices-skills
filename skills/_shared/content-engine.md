@@ -1,7 +1,7 @@
 # Content Engine — Shared Reference
 
 Shared research workflows and content patterns used by multiple skills.
-Referenced by: trending-topics, viral-writer, simulate-engagement
+Referenced by: trending, write, simulate-engagement
 
 ## 1. Subreddit Mapping
 
@@ -114,10 +114,12 @@ These patterns are derived from analysis of all Webmatrices posts (REPORT.md) an
 
 ## 5. Audience Segments (quick reference)
 
-| Segment | Primary Subs | Best Personas |
-|---------|-------------|---------------|
-| AdSense | Adsense, Blogging, juststart | warmreboot (27378), techwizardrino (19150) |
-| Fiverr | Fiverr, Freelancers | simonokimo (26714), techwizardrino (19150) |
-| SEO | SEO, Blogging | serpsherpa (19191), digitaldave01 (8653), legaleagle93 (692) |
-| Web Dev / AI | webdev, programming, vibecoding | romanking (45), techwizardrino (19150), bishwasbhn (1) |
-| Startups / SaaS | SaaS, Entrepreneur | bishwasbhn (1) |
+Fetch persona data from `get_self_personas` MCP tool. Match personas to segments based on their `metadata.personaTraits.topics` field.
+
+| Segment | Primary Subs | Persona matching criteria |
+|---------|-------------|--------------------------|
+| AdSense | Adsense, Blogging, juststart | Personas with AdSense/monetization in their topics |
+| Fiverr | Fiverr, Freelancers | Personas with freelancing/Fiverr in their topics |
+| SEO | SEO, Blogging | Personas with SEO/backlinks/ranking in their topics |
+| Web Dev / AI | webdev, programming, vibecoding | Personas with coding/AI/web dev in their topics |
+| Startups / SaaS | SaaS, Entrepreneur | Personas with startup/founder/editorial voice |

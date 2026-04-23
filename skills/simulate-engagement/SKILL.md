@@ -1,6 +1,6 @@
 ---
 name: simulate-engagement
-description: Orchestrate organic-looking engagement on Webmatrices posts. Scans posts, picks personas, decides comment types with realistic timing gaps, and outputs an engagement plan for approval before executing. Use when asked to simulate engagement, seed comments, reply to posts, or create organic-looking discussion.
+description: Orchestrate organic-looking engagement on Webmatrices posts. Fetches engagement personas from MCP, scans posts, picks personas, decides comment types with realistic timing gaps, runs /smell before publishing, previews via Playwright, and outputs an engagement plan for approval before executing. Use when asked to simulate engagement, seed comments, reply to posts, or create organic-looking discussion.
 disable-model-invocation: true
 argument-hint: [post-slug-or-scope]
 ---
@@ -15,9 +15,30 @@ For content patterns, see [content-engine.md](../_shared/content-engine.md).
 
 ## Arguments
 
-- `[post-slug]` — simulate engagement on a specific post
-- `[scope: recent / unanswered / all]` — scan posts matching a scope
-- No args — scan recent posts and suggest which need engagement
+- `[post-slug]` -- simulate engagement on a specific post
+- `[scope: recent / unanswered / all]` -- scan posts matching a scope
+- No args -- scan recent posts and suggest which need engagement
+
+---
+
+## PERSONA DATA -- ALWAYS FROM MCP
+
+**NEVER hardcode persona usernames, IDs, voice descriptions, or active hours.**
+
+At the start of every simulate-engagement invocation:
+
+1. Call `get_self_personas` MCP tool to fetch ALL personas
+2. Filter for engagement-type personas (those with `type: engagement` in their traits, or all personas if type is not set)
+3. Each persona includes `metadata.personaTraits` with: voice, topics, opinion strength, backstory, apostrophe patterns, writing samples
+4. Use these traits for voice matching, NOT a static table
+5. Fetch each persona's recent activity via `list_posts` and `get_comments` to check activity levels
+
+### Apostrophe Patterns from DB
+
+For each persona, their `metadata.personaTraits.writingSamples` contains their actual writing style. Match apostrophe usage from this data:
+- Some personas consistently skip apostrophes in common contractions (dont, cant, wont)
+- Some use them inconsistently
+- Match whatever pattern exists in their DB samples
 
 ---
 
@@ -29,7 +50,7 @@ Every seeded thread follows this distribution:
 
 - **70%** of comments agree with the post but add new information, personal experience, or data
 - **20%** mildly disagree, ask challenging questions, or offer an alternative perspective
-- **10%** are tangential — loosely related, going off-topic the way real threads do
+- **10%** are tangential -- loosely related, going off-topic the way real threads do
 
 All-agreement threads are the #1 red flag. Never seed a thread where every comment is positive.
 
@@ -51,6 +72,29 @@ Not every post gets engagement. Realistic platforms have posts with 0-1 comments
 - How-to/tutorial posts: engage 50%
 - Question posts: engage 90% (real communities answer questions)
 - Announcement/news posts: engage 40%
+
+---
+
+## CROSS-PERSONA RULES (CRITICAL)
+
+These rules prevent the most common detection failure: all personas sounding like the same writer.
+
+### No shared examples
+
+If persona A mentions "a meeting summarizer I used twice in January" in the post, persona B CANNOT reference the same tool/example in the comments. Each persona draws from their own unique experience pool.
+
+### No echoed phrasing
+
+Two personas should NEVER use the same distinctive phrase or framing. If the post says "the value proposition IS the access," a commenter cant say "the value prop is the access."
+
+Before writing each comment, scan the post and all existing comments for distinctive phrases. Avoid them.
+
+### Knowledge staggering
+
+Not everyone knows the same things:
+- If the post corrects a common misconception, a commenter written "before" reading the post can still hold the old misconception. Thats realistic.
+- One persona might not know about a tool/concept that another persona references. Thats fine. Dont have everyone be equally knowledgeable.
+- Varied expertise levels in comments = realistic thread
 
 ---
 
@@ -83,16 +127,7 @@ Never comment instantly. Instant comments are the strongest fake signal.
 
 ### Time-of-day constraints
 
-Each persona has implied timezone behavior. Dont have them commenting at 3 AM their time.
-
-| Persona | Active hours (UTC) | Pattern |
-|---------|-------------------|---------|
-| techwizardrino | 06:00-22:00 | Late-night researcher energy, active evenings |
-| serpsherpa | 08:00-18:00 | Business hours, rarely weekends |
-| digitaldave01 | 07:00-20:00 | Early riser, fades by evening |
-| bishwasbhn | 05:00-21:00 | Nepal time, erratic schedule |
-| romanking | 10:00-23:00 | Late starter, night owl |
-| warmreboot | 06:00-19:00 | Anxious early-morning checker |
+Each persona has implied timezone behavior from their `metadata.personaTraits`. Check the persona's active hours from MCP data. Dont have them commenting outside their plausible active window.
 
 ### Use `createdAt` parameter
 
@@ -104,7 +139,7 @@ All comments should use the `createdAt` parameter on `create_comment` to set the
 
 ### Type 1: Agreement + Addition (70% of comments)
 
-The commenter agrees but adds their own experience, data, or angle. This is the most common real comment type.
+The commenter agrees but adds their own experience, data, or angle.
 
 **Structure:**
 ```
@@ -113,18 +148,15 @@ The commenter agrees but adds their own experience, data, or angle. This is the 
 [Optional question or observation]
 ```
 
-**Example (warmreboot on an AdSense post):**
-> seeing the exact same thing on my end. rpm went from $4.80 to $1.90 basically overnight and i havent changed anything on the site. 23 posts, all original, decent session duration. the part that bugs me is my search console shows MORE impressions than last month but the revenue is tanking. makes no sense unless theyre devaluing certain niches entirely. are you seeing this across all your sites or just specific ones?
-
 **Rules:**
 - Must include at least one specific personal detail (number, date, tool name)
 - Must extend the conversation, not just agree
-- Tone matches the persona voice exactly
+- Tone matches the persona voice from MCP exactly
 - 80-250 words typically
 
 ### Type 2: Mild Pushback (20% of comments)
 
-The commenter disagrees partially or offers an alternative perspective. NOT hostile. Constructive disagreement.
+The commenter disagrees partially or offers an alternative perspective. NOT hostile.
 
 **Structure:**
 ```
@@ -132,9 +164,6 @@ The commenter disagrees partially or offers an alternative perspective. NOT host
 [But here's where they differ, with their own evidence]
 [Reframe or alternative interpretation]
 ```
-
-**Example (romanking pushing back on a "backlinks are dead" post):**
-> i get where youre coming from but this feels like survivorship bias. youre looking at sites that ranked without backlinks and concluding they dont matter. thats like looking at lottery winners and concluding everyone should play. my niche sites with 0 backlinks are stuck at page 3. the ones where i actually did outreach are on page 1. the difference isnt subtle. maybe backlinks are dead for YOUR niche but calling it dead universally is a stretch.
 
 **Rules:**
 - Never hostile or dismissive
@@ -144,7 +173,7 @@ The commenter disagrees partially or offers an alternative perspective. NOT host
 
 ### Type 3: Tangent (10% of comments)
 
-The commenter takes the conversation in an adjacent direction. This is what makes threads feel real — the natural drift.
+The commenter takes the conversation in an adjacent direction.
 
 **Structure:**
 ```
@@ -153,18 +182,15 @@ The commenter takes the conversation in an adjacent direction. This is what make
 [May or may not come back to the original topic]
 ```
 
-**Example (digitaldave01 going tangent on an AI tools post):**
-> this is making me think about something slightly different. ive been using these tools to automate my client reporting and honestly the part that keeps me up at night isnt whether the output is good enough. its whether my clients will figure out im using AI and feel like theyre overpaying. like is there an ethical line here? im saving 6 hours a week on reports but charging the same rate. does anyone else think about this or am i overthinking it
-
 **Rules:**
 - Must feel like a natural association, not random
 - Often reveals something personal about the commenter
-- Can introduce a new sub-topic the thread can explore
+- Can introduce a new sub-topic
 - Usually includes a question that invites further tangent
 
 ### Type 4: Short Reaction (sprinkle in)
 
-Not every comment is a paragraph. Real threads have short reactions too:
+Not every comment is a paragraph. Real threads have short reactions:
 - "this." or "yep same"
 - "lol the control tax. stealing that"
 - "saving this thread"
@@ -184,51 +210,41 @@ When the platform has real users posting, engagement shifts:
 
 ### How to reply to real users
 
-1. **Research their specific situation** — if they shared a URL, use Playwright to crawl it. If they mentioned numbers, reference them specifically.
-2. **Never be generic** — see [reply-patterns.md](../_shared/reply-patterns.md). "I actually looked at YOUR thing" is the #1 engagement pattern.
-3. **Pick the right persona** — match topic expertise, not just availability.
-4. **One persona replies first, others can follow** — but only if they have something genuinely different to add. Dont have 3 personas all saying "great post."
-
-| Real user post type | Best persona | Reply approach |
-|--------------------|--------------|----|
-| AdSense help (URL shared) | bishwasbhn | Crawl site with Playwright, give specific audit |
-| AdSense help (no URL) | warmreboot | Commiserate with own experience, ask for their numbers |
-| Fiverr help | techwizardrino | Buyer perspective, practical tips |
-| SEO question | serpsherpa or digitaldave01 | Storytelling or data-driven |
-| Hot take / opinion | romanking | Sharp pushback or agreement |
-| Beginner question | digitaldave01 | Welcoming, share own learning journey |
+1. **Research their specific situation** -- if they shared a URL, use Playwright to crawl it. If they mentioned numbers, reference them specifically.
+2. **Never be generic** -- see [reply-patterns.md](../_shared/reply-patterns.md). "I actually looked at YOUR thing" is the #1 engagement pattern.
+3. **Pick the right persona** -- match topic expertise from persona traits, not just availability.
+4. **One persona replies first, others can follow** -- but only if they have something genuinely different to add.
 
 ### Research tools for replies
 
-#### When URL is present
-Use Playwright to crawl the user's site/gig. Extract specific details to reference.
-
-#### When no URL
-Use WebSearch for current policies, algorithm changes, or best practices relevant to their question.
-
-#### Reddit context
-Search Reddit for what people are currently saying about the same topic. Use `search_reddit` with the post's core topic, targeting relevant subreddits from [content-engine.md](../_shared/content-engine.md).
+- **URL present:** Playwright to crawl the user's site/gig
+- **No URL:** WebSearch for current policies, algorithm changes
+- **Reddit context:** `reddit_search` for community sentiment on the topic
 
 ---
 
 ## WORKFLOW
 
-### Step 1: Scan the platform
+### Step 1: Fetch persona data
+
+Call `get_self_personas` MCP to load all personas with their traits, voice descriptions, active hours, and writing samples. This replaces any hardcoded persona tables.
+
+### Step 2: Scan the platform
 
 Use `list_posts` to get recent posts. For each post, note:
 - Post title, author, age, tag
 - Number of existing comments
-- Whether author is a real user or persona
+- Whether author is a real user or persona (check against persona list from Step 1)
 - Whether existing comments cover diverse perspectives
 
-### Step 2: Decide what needs engagement
+### Step 3: Decide what needs engagement
 
 Apply these filters:
 
 **Must engage (high priority):**
 - Real user posts with 0 comments (retention risk)
 - Real user posts with only 1 generic comment
-- Posts with engagement blueprints from viral-writer
+- Posts with engagement blueprints from /write
 
 **Should engage (medium priority):**
 - Persona posts that look dead (0 comments after 24hrs)
@@ -240,87 +256,65 @@ Apply these filters:
 - Very old posts (7+ days) unless theres a reason
 - Some posts deliberately (not everything gets engagement)
 
-### Step 3: Build the engagement plan
+### Step 4: Build the engagement plan
 
 For each post that needs engagement, determine:
-1. **Which personas** comment (check who hasnt been active recently)
+1. **Which personas** comment (check who hasnt been active recently using MCP data)
 2. **What type** of comment (apply 70/20/10)
-3. **What timestamp** (apply all timing rules)
+3. **What timestamp** (apply all timing rules, respecting persona active hours from MCP)
 4. **Comment content summary** (1-2 sentence description of what each comment will say)
 
-Check if viral-writer left an engagement blueprint for this post. Use it as a starting point.
+Check if /write left an engagement blueprint for this post. Use it as a starting point.
 
-### Step 4: Present the engagement plan
+### Step 5: Present the engagement plan
 
-Show the user a table:
-
-```
-ENGAGEMENT PLAN
-═══════════════
-
-Post: "i made $47.23 from adsense last month and honestly im not sure its worth it"
-Author: warmreboot | Age: 6 hours | Comments: 0
-
-  Comment 1: techwizardrino (agree+add)
-  Time: ~45 min after post (createdAt: 2026-04-12T15:30:00Z)
-  Summary: shares his own adsense numbers ($92/month), says the real question
-           is opportunity cost vs the learning value of maintaining a site
-
-  Comment 2: romanking (mild pushback)
-  Time: ~4 hours after post (createdAt: 2026-04-12T18:45:00Z)
-  Summary: pushes back — $47 is $47, most side projects make $0.
-           the real problem is comparing to influencer income numbers
-
-  Comment 3: digitaldave01 (tangent)
-  Time: next day morning (createdAt: 2026-04-13T08:15:00Z)
-  Summary: goes off on whether adsense is even the right monetization
-           for small sites, wonders about affiliate vs display ads
-
-───────────────
-
-Post: "backlinks are dead for sites under 1000 pages"
-Author: serpsherpa | Age: 2 days | Comments: 1 (agreement only)
-
-  Comment 1: romanking (pushback)
-  Time: ~2 hours from now (createdAt: 2026-04-12T16:00:00Z)
-  Summary: disagrees with specific evidence from his own sites
-
-───────────────
-Distribution check: 3 agree, 2 pushback, 1 tangent (50/33/17) ✓ close to 70/20/10
-Persona activity: techwizardrino (1 today), romanking (2 today), digitaldave01 (1 tomorrow) ✓
-Timing gaps: all gaps > 2 hours ✓
-```
+Show the user a table with: post, persona, comment type, timestamp, summary.
 
 Ask for approval or modifications.
 
-### Step 5: Write the comments
+### Step 6: Write the comments
 
 On approval, write each comment following:
 
-1. **Persona voice** — match exactly from viral-writer persona profiles
-2. **Authenticity markers** — apply apostrophe psychology, imperfection principle, rhythm from viral-writer
-3. **Banned list** — check against viral-writer's hard banned list. No em dashes, no "not X but Y", no AI vocabulary.
-4. **Length variation** — not every comment should be 200 words. Mix: one longer (200-400), one medium (100-200), one short (50-100).
-5. **HTML format** — `<p>`, `<strong>`, `<ol>`, `<ul>`, `<code>`, `<a>` tags
+1. **Persona voice** -- match exactly from persona traits loaded via MCP
+2. **Authenticity markers** -- apply apostrophe psychology from persona's writing samples, imperfection principle
+3. **Banned list** -- check against /write's hard banned list. No em dashes, no "not X but Y", no AI vocabulary.
+4. **Cross-persona rules** -- no shared examples, no echoed phrasing, knowledge staggering
+5. **Length variation** -- mix: one longer (200-400), one medium (100-200), one short (50-100)
+6. **HTML format** -- `<p>`, `<strong>`, `<ol>`, `<ul>`, `<code>`, `<a>` tags
 
 Show each draft for approval.
 
-### Step 6: Execute via MCP
+### Step 6.5: /smell check before publishing (MANDATORY)
+
+**Before publishing ANY comment, run `/smell` on it internally.**
+
+For each drafted comment:
+1. Run smell check for AI voice tells, banned phrases, persona voice consistency
+2. If any HIGH severity flags, fix the comment and re-check
+3. Only proceed to publish when the comment passes with CLEAN or minor flags only
+
+This step is non-negotiable. It catches em dashes, "Not X but Y" structures, and AI vocabulary that slip through during writing.
+
+### Step 7: Preview via Playwright
+
+Before final execution, preview each comment:
+
+1. Call `preview_comment` MCP tool with: `postId`, `userId`, `content`, optional `parentCommentId`
+2. Open `http://localhost:8897` via Playwright (`browser_navigate`)
+3. User reviews the visual preview
+4. If changes needed, edit and re-preview
+
+### Step 8: Execute via MCP
 
 On approval, use `create_comment` for each:
-- `userId`: the persona's user ID
+- `userId`: the persona's user ID (from MCP data)
 - `postId`: the target post ID
 - `content`: the HTML comment
 - `parentCommentId`: if replying to a specific comment in the thread
 - `createdAt`: the planned timestamp from the engagement plan
 
-The MCP `create_comment` tool automatically:
-- Runs content moderation (`guardContent`)
-- Updates post comment count and last activity
-- Sends email notification to the post/comment author
-- Creates audit log
-
-### Step 7: Verify
+### Step 9: Verify
 
 After execution, check:
 - Did the timing stagger correctly?
@@ -336,17 +330,14 @@ The skill should behave differently depending on platform maturity. Check post c
 ### Phase 1: EMPTY (< 50 posts, mostly persona authors)
 - Heavy seeding. 70-80% of engagement is persona-to-persona.
 - Goal: establish norms, show what "good discussion" looks like.
-- Create question posts FROM personas to model the behavior you want real users to adopt.
 
 ### Phase 2: SEEDED (50-200 posts, some real users)
 - Shift to engaging WITH real users. Reply to every real user post.
 - Persona-to-persona engagement drops to 40-50%.
-- Goal: make real users feel heard and valued.
 
 ### Phase 3: TRACTION (200+ posts, real users commenting)
 - Personas step BACK. 20-30% of engagement is seeded.
 - Let gaps exist for real users to fill.
-- Only seed when threads need diversity of opinion.
 
 ### Phase 4: ORGANIC (self-sustaining)
 - Minimal intervention. 5-10% seeded.
@@ -365,8 +356,22 @@ Before finalizing any engagement plan, verify:
 - [ ] Comment lengths vary (not all the same word count)
 - [ ] At least one comment is short (< 80 words)
 - [ ] Thread drifts slightly off-topic by comment 3-4
-- [ ] No persona uses another persona's verbal tics
-- [ ] Time-of-day is realistic for each persona
+- [ ] No persona uses another persona's verbal tics (cross-persona rules)
+- [ ] No shared examples between personas on the same thread
+- [ ] No echoed phrasing between personas
+- [ ] Knowledge levels are staggered across commenters
+- [ ] Time-of-day is realistic for each persona (from MCP active hours)
 - [ ] Not every post in the scope got engagement (some should be skipped)
-- [ ] All comments pass viral-writer's banned list check
+- [ ] All comments pass /smell check with CLEAN score
+- [ ] Apostrophe patterns match each persona's DB writing samples
 - [ ] `createdAt` timestamps are set, not defaulting to "now"
+
+---
+
+## IMPORTANT
+
+- ALL persona data comes from `get_self_personas` MCP. Zero hardcoded personas.
+- Run `/smell` on every comment before publishing. Non-negotiable.
+- Preview comments via `preview_comment` MCP before publishing.
+- Cross-persona rules (no shared examples, no echoed phrasing, knowledge staggering) are the most important anti-detection measure.
+- Match apostrophe patterns from the persona's DB writing samples.

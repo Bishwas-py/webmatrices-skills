@@ -2,7 +2,7 @@
 
 How organic engagement works, what triggers new participants, how platforms historically simulated engagement, and how to survive AI-era detection.
 
-Referenced by: simulate-engagement, detect-fake-engagement, viral-writer
+Referenced by: simulate-engagement, smell, write
 
 ---
 
