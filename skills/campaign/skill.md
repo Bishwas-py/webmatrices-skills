@@ -160,10 +160,10 @@ Ask: "Ready to preview? Run `/campaign preview` to send a test to the site owner
 
 ## SUBCOMMAND: /campaign preview
 
-1. Fetch the admin user from `get_self_personas` MCP (the site owner account)
-2. Send the email to the site owner ONLY using `send_targeted_email` MCP with:
-   - Recipient limited to the site owner's email
-   - Full email body as built in the draft
+1. Send the email to the site owner ONLY using `send_email` MCP with:
+   - `userId: 1` (the site owner's user ID)
+   - Full subject and body as built in the draft
+   - Do NOT use `send_targeted_email` for preview — it picks from the segment, not the site owner
 3. Move state to PREVIEWED
 4. Tell the user: "Test email sent to the site owner. Check your inbox. When ready: `/campaign send`"
 
