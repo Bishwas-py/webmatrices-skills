@@ -1,6 +1,6 @@
 ---
 name: app-ideas
-description: Research, validate, publish, and audit app ideas on webmatrices.com/app-ideas. Iterative pain-mining via SuperMCP, parallel scout agents to score pain vs competition, publish to the strict three-section structure (pure Problem + Why Existing Fails + Economics callout), and smell-test for leaks, missing fields, fabricated quotes, and r/r/X bugs. Use when asked to research a new app idea, validate a hypothesis, enrich/publish an idea, or audit an existing idea page.
+description: Research, validate, publish, and audit app ideas on webmatrices.com/app-ideas. Iterative pain-mining via SuperMCP, parallel scout agents to score pain vs competition, publish to the strict three-section structure (pure Problem + Why Existing Fails + Economics callout), and smell-test for cross-field coherence (whether claims in the narrative are backed by the page's own pain points / source posts / existingSolutions, whether pain quotes match their sources, plus length and r/r/X bugs). Use when asked to research a new app idea, validate a hypothesis, enrich/publish an idea, or audit a page for incoherence.
 disable-model-invocation: true
 argument-hint: [track / publish / smell] [topic / slug]
 ---
@@ -15,7 +15,7 @@ Research and publish app ideas. The /app-ideas/[slug] page is a **decision tool*
 |---------|-------------|
 | `/app-ideas track [topic]` | Iterative pain-mining + parallel scout agents to validate or kill candidate ideas |
 | `/app-ideas publish [slug]` | Push validated research to prod via MCP with the strict three-section structure |
-| `/app-ideas smell [slug]` | Audit a published idea for field leaks, length violations, missing data, r/r/X bugs, fabricated quotes, and not-lifelike content. Read-only. |
+| `/app-ideas smell [slug]` | Audit a published idea for **cross-field coherence** — claims in the narrative backed by pain points / source posts / existingSolutions, pain quotes matching their source URLs, competitor mentions matching solution rows. Plus length violations, r/r/X bugs, and missing data. Read-only. |
 
 If `track` finds a PURSUE-grade idea, hand off to `publish` with the enriched payload. After any `publish`, run `smell` on the slug to verify nothing slipped past discipline.
 
@@ -223,7 +223,9 @@ For an idea page to look credible publicly:
 
 ## /app-ideas smell — Audit a published idea
 
-Read-only authenticity + discipline scanner. Run on any slug (or all 28 ideas at once) to find leaks, missing fields, formatting bugs, fabricated quotes, and not-lifelike content.
+Read-only **coherence** scanner. The main job is checking whether the page's data points hang together — whether claims in the narrative are backed by the page's own pain points / source posts / existingSolutions, whether pain quotes match their source URLs, whether competitor mentions match solution rows. Plus the standard hygiene checks (length budgets, r/r/X bugs, missing scores).
+
+This is **not** an AI-detection scanner like `/webmatrices:smell` — for deep authenticity analysis, run that one on the rendered text. App-ideas smell is about the data hanging together correctly.
 
 ### Input
 
@@ -233,7 +235,7 @@ Read-only authenticity + discipline scanner. Run on any slug (or all 28 ideas at
 | `all` or no args | Audit all ideas via `list_app_ideas` then iterate |
 | `recent N` | Audit the N most recent ideas by createdAt |
 
-### Three smell categories
+### Four smell categories
 
 #### Category 1: FIELD DISCIPLINE
 
@@ -262,20 +264,39 @@ Field-level violations against the Allowed budget table above.
 | `highlights` bullet > 120 chars | LOW | Bullet is a paragraph; one buying argument per bullet. |
 | `tried_and_rejected` is null | LOW | Recent 4 all populate this — sells the "current world is broken" narrative. |
 
-#### Category 2: DATA OWNERSHIP + AUTHENTICITY
+#### Category 2: COHERENCE & EVIDENCE (the main job)
 
-Source-laundering and AI tells in body narrative.
+Whether the page's claims hang together. Every number, competitor name, and quote in the narrative should be backed by data on the same page (a pain point, source post, or existingSolution row). Orphan claims = the page reads disconnected.
+
+**Narrative ↔ Page data:**
 
 | Signal | Severity | Detection |
 |---|---|---|
-| Body narrative contains `From r/X:` or `from r/X` | HIGH | Source-laundering. Embed the quote in owned framing instead. |
-| Body narrative contains `A Reddit user`, `Reddit users`, `One commenter`, `Someone on Reddit` | HIGH | Passive aggregator energy — the curator should own the insight. |
-| Same subreddit mentioned > 1 time in any single long-form section | MEDIUM | Citation overload — the dedicated Pain Point + Source Evidence cards already attribute. |
-| Subreddit names mentioned > 2 times across the whole page narrative | MEDIUM | The reader gets it. Trim. |
-| Body narrative contains AI tells from the /smell skill (em dashes between thoughts, "let that sink in", "fair point", "delve", "leverage", "comprehensive", "robust") | HIGH | Reads as AI-generated, not curated. |
-| `<blockquote>` wraps text without `<em>` formatting | LOW | The page renders blockquotes italic — `<em>` inside is the convention. |
-| Quote attributed to a source URL whose Reddit slug doesn't appear in `postLinks[]` | HIGH | Quote is fabricated or its source post is missing — the receipt isn't there. |
-| Pain quote contains mid-thought correction ("actually wait, I got this wrong") | LOW (informational) | Real human marker, not a smell — flag only as a positive signal. |
+| `$` amount appears in `problem_statement` / `economics_context` / `highlights` / `verdict` but no pain point quote, source post snippet, or solution `pricing` field on the page contains the same figure | HIGH | Orphan number. Either back it with evidence or drop it. (Externally well-known facts like "FTC v. accessiBe $1M" are exempt — citation is the source.) |
+| Competitor name appears in `competition_notes` / `why_existing_fails` / `verdict` / `tried_and_rejected` but no matching entry in `existingSolutions[]` (case-insensitive name match) | HIGH | Solution should be added to `existingSolutions` so readers can see scores + pricing on its card. |
+| `existingSolutions[]` row whose `name` is never referenced in any narrative field | MEDIUM | Why is it there? Either add a sentence about it in `competition_notes` / `why_existing_fails`, or delete the row. |
+| Solution `pricing` mentioned in narrative differs from the row's `pricing` field (e.g. narrative says "$199/mo" but solution row says "$299/mo") | HIGH | Stale or contradictory data — pick one source of truth. |
+| `target_audience` claims a specific role/billing rate/segment size that doesn't appear in any pain point or source post snippet | MEDIUM | Audience is hand-wavy — back it with at least one evidence quote. |
+| `verdict` claims urgency/window not reinforced by `market_timing` or `economics_context` | MEDIUM | The "why now" should appear in at least 2 places consistently. |
+| `highlights` bullet asserts a fact (number, regulation date, competitor outcome) not present anywhere else on the page | MEDIUM | Orphan bullet. Either add the supporting context elsewhere or rewrite the bullet to reflect what's actually on the page. |
+| `whyExistingFails` contains an `<h3>` for a competitor not in `existingSolutions[]` | HIGH | Section heads must align with the cards rendered below — readers expect to scroll to the matching card. |
+
+**Pain point ↔ Source post:**
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Pain point's `sourceUrl` is not the URL of any row in `postLinks[]` for the same idea | HIGH | The receipt isn't on the page. Either add the source post via `add_source_posts`, or fix the pain point's URL. |
+| Pain point `sourceCommunity` doesn't match the subreddit in its `sourceUrl` (e.g. URL `/r/Baking/comments/...` but community `"Cooking"`) | HIGH | Mis-tagged. Update via `update_pain_point`. |
+| Pain point `score` / `num_comments` differ from the matching source post's numbers (when both exist on the page) | HIGH | Same Reddit thread = one data point — values must agree. Copy from the source post. |
+| Pain point quote isn't a verbatim or near-verbatim string from the linked Reddit thread (verify via `reddit_get_post`) | HIGH | Paraphrased or fabricated. Replace with the actual quote. |
+
+**Source post ↔ URL:**
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Source post `sourceCommunity` doesn't match URL path subreddit | HIGH | URL `/r/SaaS/comments/...` with `sourceCommunity="smallbusiness"` is wrong. |
+| Source post `sourceType=reddit` but `url` isn't a `reddit.com/r/...` form | HIGH | Wrong sourceType or wrong URL. |
+| Source post `score` is order-of-magnitude off from a freshly-fetched value (verify via `reddit_get_post`) | LOW | Reddit scores drift — only flag if numbers differ by >10x. |
 
 #### Category 3: DATA QUALITY (relations)
 
@@ -303,6 +324,20 @@ Quality of the underlying pain points, source posts, solutions, and APIs.
 | `postLinks.length` < 10 | HIGH | Below publication credibility bar. |
 | `existingSolutions.length` < 3 | MEDIUM | Below the comparison threshold readers expect. |
 | `apiRequirements.length` < 3 | LOW | Build spec is sparse for engineer evaluators. |
+
+#### Category 4: AUTHENTICITY (light — defer to `/webmatrices:smell` for deep analysis)
+
+Quick AI-tell + source-laundering checks on the body narrative. This skill is not the right place for deep authenticity analysis — for that, copy the rendered text and run `/webmatrices:smell "..."`. The checks here catch only the most obvious leaks.
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Body narrative contains `From r/X:` or `from r/X` | HIGH | Source-laundering. Embed the quote in owned framing instead. |
+| Body narrative contains `A Reddit user`, `One commenter`, `Someone on Reddit` | HIGH | Passive aggregator energy. |
+| Same subreddit mentioned > 1 time in any single long-form section | LOW | Citation overload — pain point + source post cards already attribute. |
+| Body narrative contains banned AI vocabulary: `delve`, `leverage`, `comprehensive`, `robust`, `streamline`, `let that sink in`, `fair point` | HIGH | Reads as AI-generated. |
+| `<blockquote>` not wrapped in `<em>` | LOW | Page convention is italic blockquotes. |
+
+For deeper checks (THE THIN LINE tests, hypothetical realness, polite-stranger test, voice consistency), run `/webmatrices:smell` on the rendered page text.
 
 ### Verdict-state sanity checks
 
