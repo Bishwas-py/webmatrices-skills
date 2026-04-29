@@ -298,6 +298,25 @@ Whether the page's claims hang together. Every number, competitor name, and quot
 | Source post `sourceType=reddit` but `url` isn't a `reddit.com/r/...` form | HIGH | Wrong sourceType or wrong URL. |
 | Source post `score` is order-of-magnitude off from a freshly-fetched value (verify via `reddit_get_post`) | LOW | Reddit scores drift — only flag if numbers differ by >10x. |
 
+**Semantic / theme coherence (the deep checks):**
+
+These are about whether the narrative's *meaning* aligns with what the page's data actually shows. Use fuzzy matching where exact comparison isn't possible.
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Quoted text inside `<em>` or `<blockquote>` in `problem_statement` / `why_existing_fails` / `economics_context` doesn't appear (verbatim or ≥80% string overlap) in any `painPoint.quote` on the page | HIGH | The narrative is "quoting" something the page doesn't actually evidence. Either add the matching pain point, or rewrite the quote to one that exists. |
+| Pain point `pattern` values (the 2–4 word categories) are not reflected in `problem_statement` text by at least their root keywords | MEDIUM | Page has 15 pain points tagged "deadline panic" / "spreadsheet hell" / "volunteer turnover" but problem statement talks about something else entirely → narrative drift from data. |
+| Narrative claims "the most repeated ask is X" / "the most-cited complaint" / "the dominant pattern" but the highest-`score` pain point's content doesn't reflect X | HIGH | The asserted top theme isn't the actual top theme. Re-rank or rewrite. |
+| `why_existing_fails` `<h3>` for competitor X has no pain point on the page that mentions X by name (or the underlying complaint about X) | MEDIUM | Section is unsupported — either add a pain point that complains about X, or trim the section to a sentence in `competition_notes`. |
+| Bolded number in `economics_context` (e.g. `<strong>$5K-$30K</strong>`) is not traceable to: (a) a `painPoint.quote`, (b) a `sourcePost.snippet`, (c) a `solution.pricing`, (d) an externally-cited fact named in narrative ("FTC v. accessiBe $1M order") | HIGH | Floating number — if it can't be sourced, it's hand-waved. Either back it or drop it. |
+| Narrative uses recency markers ("recent", "in 2025", "fresh", "post-2024", "2025-2026 threads") but no source post URL has a Reddit slug consistent with that period (Reddit URL slugs are roughly time-ordered; post IDs starting with `1n...`/`1o...`/`1p...`/`1q...`/`1r...`/`1s...` are 2024-2026) | MEDIUM | Recency claim isn't backed. Either remove the recency framing or add a recent source. |
+| Narrative uses frequency markers ("every week", "the same ask resurfaces", "for fourteen years") but source posts cluster in a single time window | MEDIUM | Frequency claim isn't backed by spread of source dates. |
+| `problem_statement` declares a count ("three failure modes", "five repeated complaints") but the structured page doesn't have that count (e.g. only 2 distinct pain `pattern` categories present, or only 2 sections in `why_existing_fails`) | MEDIUM | Counted claim doesn't match counted reality. Adjust the number or add the missing items. |
+| Pain points have ≥10 entries but ≤2 distinct `pattern` values | MEDIUM | The "wide range of pain" implication doesn't hold — re-pattern the pain points or acknowledge the narrow theme. |
+| `verdict` says "MVP in N weeks" or similar effort estimate that contradicts `build_complexity` score (e.g. "4-6 weeks" with `build_complexity=9`) | MEDIUM | Effort claim mismatches scored complexity. Pick one. |
+| `target_audience` declares a specific persona but no pain point quote uses that persona's voice or context (e.g. audience says "solo electricians billing $85-150/hr" but no pain quote mentions billing rates, solo work, or electrician-specific context) | MEDIUM | Audience hand-waved — at least one pain point should sound like the named persona. |
+| Each `highlights` bullet must have ≥1 supporting field elsewhere on the page (matching pain point, source post snippet, economics fact, solution row, or external citation in narrative) | MEDIUM | Orphan bullet — the case-for-Build is claiming things the page doesn't otherwise show. |
+
 #### Category 3: DATA QUALITY (relations)
 
 Quality of the underlying pain points, source posts, solutions, and APIs.
@@ -349,6 +368,20 @@ Compare scores against verdict prefix:
 | `painIntensity ≥ 8 AND competitionLevel ≤ 3 AND verdict does NOT mention specific go-build action` | LOW | Strong setup but verdict reads tepid — sharpen the call. |
 | `verdict starts with VALIDATED` but no `existingSolutions` entry has the validating case study referenced | MEDIUM | VALIDATED prefix should be backed by a specific competitor making money. |
 | `verdict starts with DISMISSED` but the idea is still live (not soft-deleted) | LOW | Consider `delete_app_idea` to keep the public catalog clean. |
+
+### How to run the deep semantic checks
+
+The structural checks (length, r/r/X, missing fields) are mechanical — run them first via raw field comparisons. The semantic coherence checks need more care:
+
+1. **Quote echo** — extract every string inside `<em>`, `<blockquote>`, or quoted text in the narrative HTML fields. For each, normalize (lowercase, strip punctuation/whitespace) and check substring containment against the normalized concatenation of all `painPoint.quote` values. Anything below ~80% match → flag.
+2. **Theme overlap** — tokenize all `painPoint.pattern` values into root keywords (e.g. "deadline panic" → `["deadline", "panic"]`). For each pattern, at least one of its root keywords should appear in `problem_statement` text (case-insensitive). Flag patterns with zero keyword presence.
+3. **"Most repeated ask" claim** — when narrative contains phrases like "most repeated ask", "dominant pattern", "most common complaint", extract the surrounding clause and compare it against the highest-`score` pain point's quote/pattern.
+4. **whyExistingFails ↔ pain points** — for each `<h3>` in `why_existing_fails`, extract the heading text. Check that at least one `painPoint.quote` mentions any word from the heading (the competitor name typically).
+5. **Number sourcing** — extract every `<strong>NUMBER</strong>` from `economics_context`. For each, scan all pain quotes, source post snippets, and solution pricing fields for the same figure. If not found, scan the surrounding economics_context paragraph for an external citation pattern ("FTC v.", "DOJ", "EAA", a date, etc.). If still not found → flag.
+6. **Recency check** — Reddit post slugs like `/comments/1s305p8/` start with a base-36-ish character that roughly indicates posting time. Posts starting with `1s`/`1q`/`1r` are late 2025; `1n`/`1o`/`1p` are mid-late 2025; older slugs (5-6 chars) are pre-2024. If narrative says "recent" or "2025-2026" but all source URLs have older slugs → flag.
+7. **Frequency check** — count distinct `sourcePost.url` paths and look at slug spread. If narrative says "every week" or "for fourteen years" and all 12 source posts cluster in slugs from one quarter → flag.
+
+For the trickier ones (semantic similarity beyond substring matching), an LLM-judge call is acceptable: pass the narrative claim + the page evidence and ask "does the evidence support this claim? yes/no/partial".
 
 ### Output format
 
