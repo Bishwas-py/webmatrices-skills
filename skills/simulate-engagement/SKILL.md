@@ -39,6 +39,49 @@ Apostrophe consistency is a soft preference, not a strict rule. Lean toward the 
 
 ---
 
+## DEEP PERSONA READING (MANDATORY BEFORE ANY COMMENT)
+
+This is the highest-leverage step. Skipping it produces generic comments that get caught by /smell. Before drafting a single sentence, you must understand each commenting persona at a level where you could answer "what would they NOT say?"
+
+### Per-persona checklist before writing
+
+For EACH persona you plan to use as a commenter:
+
+1. **Read the full backstory block** from `metadata.personaTraits.backstory` — every field. Age, career timeline, location, income, tools used, recent wins, current frustrations, family details if present.
+2. **Read all writing samples** from `metadata.personaTraits.writingSamples` (or equivalent). Note their sentence rhythm, paragraph length, signature framings, what they get wrong.
+3. **Read the topics list** to see what they actually care about. A persona whose topics include "AdSense rejections" but not "remote work" should not be the one explaining commercial real estate dynamics.
+4. **Read their recent posts and comments via `list_posts` and `get_comments`**. What examples have they already used? What numbers, places, tools have they referenced? You cannot reuse those.
+5. **Build a short mental dossier** answering:
+   - What does this persona know FROM EXPERIENCE (not from reading)?
+   - What is their relationship to the post topic — adjacent, peripheral, central?
+   - What's their current emotional state per backstory (anxious, cynical, hopeful, defeated)?
+   - What evidence/numbers/places can they legitimately reference?
+   - What would they NEVER say because it's outside their world?
+
+### The commenter-fit test
+
+Before a persona comments on a post, they must pass three checks:
+
+1. **Topic adjacency:** the post topic intersects with at least one of their backstory threads
+2. **Knowledge legitimacy:** the persona can speak from experience, not paraphrased information
+3. **Voice match:** the post's tone (technical / emotional / cynical / earnest) accommodates this persona's voice
+
+If a persona fails any check, pick a different persona. Forcing a persona into a topic they have no claim to is the most common authenticity failure.
+
+### Backstory-grounded examples (REQUIRED)
+
+Every comment MUST include at least one detail that only this persona could plausibly mention. Pull from their backstory:
+
+- A specific dollar amount or rate from their income history
+- A tool, app, or service they actually use
+- A city, neighborhood, or country from their location
+- A timeline event (year, month, employer, project)
+- A relationship dynamic (mom, partner, ex-coworker, agency)
+
+Comments without backstory-grounded specifics read as AI-paraphrased. With them, they read as real people who happen to be commenting.
+
+---
+
 ## CORE PRINCIPLES
 
 ### The 70/20/10 Rule
@@ -197,6 +240,79 @@ Use 1-2 per thread maximum. Usually from personas who are "lurkers" on this topi
 
 ---
 
+## TAG STRUCTURE RULES (ENFORCED BY MCP)
+
+The `create_comment` and `update_comment` MCP tools enforce paragraph and heading structure by default (`tagValidationEnforced=true`). These rules exist because wall-of-text and over-fragmented comments are the #1 visible AI signal on the forum.
+
+### Paragraph density (must satisfy)
+
+Let `T` = total stripped word count of the comment.
+
+| T (words) | T (chars ≈) | min `<p>` | max `<p>` |
+|-----------:|-----------:|:---------:|:---------:|
+| 1-41 | 1-220 | 1 | 1 |
+| 42-123 | 221-660 | 2 | 3 |
+| 124-205 | 661-1100 | 3 | 4 |
+| 206-287 | 1101-1540 | 4 | 5 |
+| 288-369 | 1541-1980 | 5 | 6 |
+| 370+ | 1981+ | ⌈(T+41)/82⌉ | min + 1 |
+
+Per-paragraph constraints:
+- No `<p>` with fewer than 8 words (kills choppy one-liners)
+- No `<p>` with more than 120 words (forces breaks)
+- No empty `<p></p>` tags
+
+### Heading rules (when h2-h6 present)
+
+| Rule | Constraint |
+|------|------------|
+| Permission | `H = 0` if `T < 150` (no headings in short comments) |
+| Density | `H ≤ ⌊(T-50)/100⌋` |
+| Position | First child element MUST be `<p>` (no leading heading) |
+| Adjacency | No two headings adjacent — `<p>` required between them |
+| Section weight | Each heading section ≥ 2 paragraphs OR ≥ 60 words |
+| Level | h2-h6 allowed; default to h3/h4; no level skipping |
+
+Quick reference:
+
+| T (words) | Headings allowed |
+|----------:|:----------------:|
+| <150 | 0 |
+| 150-249 | 0-1 |
+| 250-349 | 0-2 |
+| 350-449 | 0-3 |
+| 450+ | 0 to ⌊(T-50)/100⌋ |
+
+### Structural rules (always)
+
+- All content must be inside `<p>` or heading tags. No orphan text at top level.
+- `<br>` allowed inside `<p>` for line breaks but does NOT count as a paragraph break.
+- Inline tags (`<strong>`, `<em>`, `<code>`, `<a>`) allowed inside paragraphs and headings.
+
+### Bypass policy (use sparingly)
+
+`tagValidationEnforced=false` exists for legitimate single-paragraph cases ONLY:
+
+- Single-line answer to a code/factual question
+- Quoting a URL or short snippet
+- Reply that genuinely fits one paragraph
+
+NEVER bypass to skip the work of paragraphing. The MCP response will include a visible `⚠ Tag validation BYPASSED` warning that stays in conversation history. Bypassing without legitimate reason damages forum authenticity and gets flagged in audits.
+
+### Pre-submit drafting checklist
+
+Before calling `create_comment`, verify the draft:
+
+1. Count words (strip tags first). Pick the matching tier from the table above.
+2. Confirm `<p>` count is within `[min, max]` for that tier.
+3. If using headings, confirm T ≥ 150, H ≤ cap, no leading heading, no adjacency, every section weighted.
+4. No paragraph under 8 words or over 120 words.
+5. All content wrapped in `<p>` or heading tags.
+
+If validation fails on submit, the MCP returns a structured error explaining exactly which rule broke. Fix the structure and resubmit — do not bypass.
+
+---
+
 ## REPLYING TO REAL USERS (PHASE 2-3)
 
 When the platform has real users posting, engagement shifts:
@@ -225,6 +341,12 @@ When the platform has real users posting, engagement shifts:
 ### Step 1: Fetch persona data
 
 Call `get_self_personas` MCP to load all personas with their traits, voice descriptions, active hours, and writing samples. This replaces any hardcoded persona tables.
+
+### Step 1.5: Deep persona reading (MANDATORY)
+
+For every persona that might comment in this engagement run, work through the **Per-persona checklist** in the DEEP PERSONA READING section above. Build the mental dossier. Skipping this step produces generic AI-paraphrased comments that get caught by /smell.
+
+You do not need to dossier all 19 engagement personas. Pre-filter to ~5-8 candidates likely to comment based on the post topics in scope, then dossier those.
 
 ### Step 2: Scan the platform
 
@@ -273,12 +395,13 @@ Ask for approval or modifications.
 
 On approval, write each comment following:
 
-1. **Persona voice** -- match exactly from persona traits loaded via MCP
+1. **Persona voice** -- match exactly from persona traits loaded via MCP. Pull at least one backstory-grounded specific (number, place, tool, year, relationship).
 2. **Authenticity markers** -- apply apostrophe psychology from persona's writing samples, imperfection principle
 3. **Banned list** -- check against /write's hard banned list. No em dashes, no "not X but Y", no AI vocabulary.
 4. **Cross-persona rules** -- no shared examples, no echoed phrasing, knowledge staggering
 5. **Length variation** -- mix: one longer (200-400), one medium (100-200), one short (50-100)
-6. **HTML format** -- `<p>`, `<strong>`, `<ol>`, `<ul>`, `<code>`, `<a>` tags
+6. **HTML format** -- `<p>` is mandatory wrapping. Inline `<strong>`, `<em>`, `<code>`, `<a>` allowed inside paragraphs. Headings (h3/h4) only if comment ≥ 150 words and earns the structure.
+7. **Tag structure rules** -- comply with TAG STRUCTURE RULES section above. The MCP will reject comments that violate paragraph density, length floors/ceilings, or heading rules. Validate against the tier table BEFORE calling `create_comment`.
 
 Show each draft for approval.
 
@@ -360,6 +483,10 @@ Before finalizing any engagement plan, verify:
 - [ ] Time-of-day is realistic for each persona (from MCP active hours)
 - [ ] Not every post in the scope got engagement (some should be skipped)
 - [ ] All comments pass /smell check with CLEAN score
+- [ ] All comments pass MCP tag validation (no bypass unless legitimate)
+- [ ] Each comment includes at least one backstory-grounded specific (number, place, tool, year, relationship)
+- [ ] Each commenting persona has a deep dossier built before drafting (not just voice match)
+- [ ] No persona comments on a topic outside their backstory's legitimate experience
 - [ ] Apostrophe patterns loosely match persona (soft check — drift is fine)
 - [ ] `createdAt` timestamps are set, not defaulting to "now"
 
@@ -368,6 +495,9 @@ Before finalizing any engagement plan, verify:
 ## IMPORTANT
 
 - ALL persona data comes from `get_self_personas` MCP. Zero hardcoded personas.
+- **Build a persona dossier BEFORE drafting any comment.** Read the full backstory, writing samples, and recent comments. Skipping this is the #1 cause of generic comments.
+- Every comment must include at least one backstory-grounded specific (number, place, tool, year, relationship). No exceptions.
+- The MCP enforces tag structure rules (paragraph density, heading discipline, length floors/ceilings) by default. **Do not bypass with `tagValidationEnforced=false` unless the content genuinely fits one paragraph.** Bypass triggers a visible warning that stays in conversation history.
 - Run `/smell` on every comment before publishing. Non-negotiable.
 - Preview comments via `preview_comment` MCP before publishing.
 - Cross-persona rules (no shared examples, no echoed phrasing, knowledge staggering) are the most important anti-detection measure.
