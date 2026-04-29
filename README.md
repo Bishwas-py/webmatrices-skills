@@ -21,6 +21,13 @@ Claude Code plugin for managing the [Webmatrices](https://webmatrices.com) commu
 | smell | `/webmatrices:smell [postId/slug/commentId/username/text]` | Universal authenticity scanner for AI tells, factual issues, and cross-persona bleeding |
 | reduce-smell | `/webmatrices:reduce-smell [postId/slug/commentId/text]` | Generate diff-style fixes for problems found by `/smell` (preview only, never publishes) |
 
+### App ideas
+
+| Skill | Command | Description |
+|-------|---------|-------------|
+| app-ideas | `/webmatrices:app-ideas track [topic]` | Iterative pain-mining + parallel scout agents to validate or kill candidate app ideas |
+| app-ideas | `/webmatrices:app-ideas publish [slug]` | Push validated research to /app-ideas/[slug] with the strict three-section structure (Problem + Why Existing Fails + Economics callout) |
+
 ### Moderation & admin
 
 | Skill | Command | Description |
