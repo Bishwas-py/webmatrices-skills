@@ -85,6 +85,28 @@ For each PURSUE idea, dispatch ONE enrichment agent to deepen to publication bar
 
 The page renders these sections in order. Field budgets are enforced by the page UX, not the schema — keep things terse.
 
+### Reader's decision journey (purpose of each field)
+
+The /app-ideas/[slug] page is a **decision tool**. The reader is asking: "Should I build this?" Every field exists to answer one question in that journey — in order:
+
+| Order | Section | Field(s) | Question it answers | Purpose in the page |
+|---|---|---|---|---|
+| 1 | The Problem | `problem_statement` | "What pain are we solving?" | **Hook.** Make the pain visceral. Reader should feel it in their chest before they see numbers or competitors. |
+| 2 | By the Numbers | `economics_context` | "Is this a real market?" | **Quantify.** Emerald visual block. Stat-stack of settlements / TAM / pricing pressure. Proves the money is there. |
+| 3 | Why Existing Solutions Don't Solve It | `why_existing_fails` | "What about [Competitor X]?" | **Eliminate alternatives.** Per-competitor section showing why each named incumbent doesn't fit our ICP. Closes the "but isn't this already done?" objection. |
+| 4 | Overview | `description` + `target_audience` + `revenue_model` + `price_range` + `build_complexity` + `competition_level` | "What is the product, who buys it, how much, how hard to build?" | **Synthesize.** The product specs in one card. Reader skim-reads to confirm the shape of the bet. |
+| 5 | Verdict | `verdict` + `market_timing` | "Should I actually build this, and why now?" | **Judgment.** The honest call (Build / VALIDATED / DISMISSED) plus the time-bound rationale. The "go/no-go" beat. |
+| 6 | What's Been Tried | `tried_and_rejected` | "Aren't users already solving this somehow?" | **Reinforce the gap.** Amber callout. Lists the workarounds (Excel, ChatGPT, calling the supply house) and why each one breaks. |
+| 7 | Highlights | `highlights` | "Give me 5–7 reasons to Build." | **Buying arguments.** Scannable bullets, one buying argument each. The case-for-Build TL;DR. |
+| 8 | Pain Points | `painPoints[]` | "What exactly do users say?" | **Evidence (granular).** Per-quote cards with sourceCommunity badge, score/comments, "Me too" pill. Sortable by score. |
+| 9 | Source Evidence | `postLinks[]` | "Where did this research come from?" | **Receipts.** Linked source posts (Reddit/HN/LinkedIn) with title, score, comments. Proves the curator actually did the work. |
+| 10 | Existing Solutions | `existingSolutions[]` | "What does each competitor look like up close?" | **Compare.** Competitor cards with pricing, limitation, 1–10 scores on 6 axes. Per-card detail page for deep dive. |
+| 11 | API Requirements | `apiRequirements[]` | "Can I actually build this?" | **Build spec.** For the engineer evaluating feasibility. Lists APIs/integrations needed with complexity rating. |
+
+The narrative fields (1–7) build the case in a specific order — pain → money → alternatives eliminated → product spec → verdict → workarounds → buying arguments. Don't reorder, don't skip.
+
+The data fields (8–11) are the receipts — granular evidence that the narrative isn't hand-waved.
+
 ### Field-by-field budget + role
 
 The **Allowed window** is the enforcement target — write to land inside it, never go past the upper bound. The recent 4 ideas (ADA Litigation Shield, SparkQuote, GrantClock, CottageLegal) are the gold standard for the three-section structure and all sit comfortably inside these windows.
