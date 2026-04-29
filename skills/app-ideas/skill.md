@@ -1,8 +1,8 @@
 ---
 name: app-ideas
-description: Research, validate, and publish app ideas to webmatrices.com/app-ideas. Iterative pain-mining via SuperMCP (Reddit/LinkedIn/Dev.to), parallel scout agents to score pain vs competition, then publish to the strict three-section structure (pure Problem + Why Existing Fails + Economics callout). Use when asked to research a new app idea, validate a hypothesis, enrich an existing idea, or publish app idea pages.
+description: Research, validate, publish, and audit app ideas on webmatrices.com/app-ideas. Iterative pain-mining via SuperMCP, parallel scout agents to score pain vs competition, publish to the strict three-section structure (pure Problem + Why Existing Fails + Economics callout), and smell-test for leaks, missing fields, fabricated quotes, and r/r/X bugs. Use when asked to research a new app idea, validate a hypothesis, enrich/publish an idea, or audit an existing idea page.
 disable-model-invocation: true
-argument-hint: [track / publish] [topic / slug]
+argument-hint: [track / publish / smell] [topic / slug]
 ---
 
 # App Ideas
@@ -15,8 +15,9 @@ Research and publish app ideas. The /app-ideas/[slug] page is a **decision tool*
 |---------|-------------|
 | `/app-ideas track [topic]` | Iterative pain-mining + parallel scout agents to validate or kill candidate ideas |
 | `/app-ideas publish [slug]` | Push validated research to prod via MCP with the strict three-section structure |
+| `/app-ideas smell [slug]` | Audit a published idea for field leaks, length violations, missing data, r/r/X bugs, fabricated quotes, and not-lifelike content. Read-only. |
 
-If `track` finds a PURSUE-grade idea, hand off to `publish` with the enriched payload.
+If `track` finds a PURSUE-grade idea, hand off to `publish` with the enriched payload. After any `publish`, run `smell` on the slug to verify nothing slipped past discipline.
 
 ---
 
@@ -220,6 +221,135 @@ For an idea page to look credible publicly:
 
 ---
 
+## /app-ideas smell — Audit a published idea
+
+Read-only authenticity + discipline scanner. Run on any slug (or all 28 ideas at once) to find leaks, missing fields, formatting bugs, fabricated quotes, and not-lifelike content.
+
+### Input
+
+| Input | What it does |
+|---|---|
+| `[slug]` | Audit one idea via `get_app_idea(slug)` |
+| `all` or no args | Audit all ideas via `list_app_ideas` then iterate |
+| `recent N` | Audit the N most recent ideas by createdAt |
+
+### Three smell categories
+
+#### Category 1: FIELD DISCIPLINE
+
+Field-level violations against the Allowed budget table above.
+
+| Signal | Severity | Detection |
+|---|---|---|
+| `description` > 350 chars | HIGH | It's a paragraph, not an Overview. Move detail to `problem_statement` or `economics_context`. |
+| `description` < 100 chars | MEDIUM | Too thin, reader can't parse the product shape. |
+| `target_audience` > 100 chars | MEDIUM | Sub-segments leaking — should be one sentence. |
+| `revenue_model` > 30 chars | LOW | Probably a description; pull out to `description`. |
+| `price_range` > 100 chars | HIGH | Prisma will reject the next write. Compress now. |
+| `price_range` lacks digits | MEDIUM | "Subscription" without a number is useless to the reader. |
+| `verdict` > 220 chars | LOW | Buying arguments are leaking — move to `highlights`. |
+| `market_timing` > 260 chars | LOW | Probably listing market data; move numbers to `economics_context`. |
+| `competition_notes` > 280 chars | MEDIUM | Structured competitor analysis is leaking; move to `why_existing_fails` (rich HTML). |
+| `problem_statement` > 1,100 chars on a NEW idea | HIGH | Money or competitors are leaking in. Audit and move them. |
+| `problem_statement` < 600 chars | MEDIUM | Too thin; add the "what this looks like in real life" middle paragraph. |
+| `problem_statement` contains `$` | HIGH | Money figures should live in `economics_context`. |
+| `problem_statement` mentions any solution name listed in `existingSolutions[].name` | HIGH | Competitor names should live in `why_existing_fails`. |
+| `why_existing_fails` is null or empty AND idea created after 2026-04-29 | HIGH | New ideas must populate the three-section split. |
+| `economics_context` is null or empty AND idea created after 2026-04-29 | HIGH | Same — new ideas need the visual stat block. |
+| `why_existing_fails` > 1,200 chars | LOW | Sections are verbose; trim each to name + pricing + 1-2 sentence why. |
+| `economics_context` > 900 chars | LOW | Visual block becomes a wall; cut to ≤6 bullets + 1 framing paragraph. |
+| `highlights` < 5 bullets | MEDIUM | Page feels half-baked. Always 5-7. |
+| `highlights` bullet > 120 chars | LOW | Bullet is a paragraph; one buying argument per bullet. |
+| `tried_and_rejected` is null | LOW | Recent 4 all populate this — sells the "current world is broken" narrative. |
+
+#### Category 2: DATA OWNERSHIP + AUTHENTICITY
+
+Source-laundering and AI tells in body narrative.
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Body narrative contains `From r/X:` or `from r/X` | HIGH | Source-laundering. Embed the quote in owned framing instead. |
+| Body narrative contains `A Reddit user`, `Reddit users`, `One commenter`, `Someone on Reddit` | HIGH | Passive aggregator energy — the curator should own the insight. |
+| Same subreddit mentioned > 1 time in any single long-form section | MEDIUM | Citation overload — the dedicated Pain Point + Source Evidence cards already attribute. |
+| Subreddit names mentioned > 2 times across the whole page narrative | MEDIUM | The reader gets it. Trim. |
+| Body narrative contains AI tells from the /smell skill (em dashes between thoughts, "let that sink in", "fair point", "delve", "leverage", "comprehensive", "robust") | HIGH | Reads as AI-generated, not curated. |
+| `<blockquote>` wraps text without `<em>` formatting | LOW | The page renders blockquotes italic — `<em>` inside is the convention. |
+| Quote attributed to a source URL whose Reddit slug doesn't appear in `postLinks[]` | HIGH | Quote is fabricated or its source post is missing — the receipt isn't there. |
+| Pain quote contains mid-thought correction ("actually wait, I got this wrong") | LOW (informational) | Real human marker, not a smell — flag only as a positive signal. |
+
+#### Category 3: DATA QUALITY (relations)
+
+Quality of the underlying pain points, source posts, solutions, and APIs.
+
+| Signal | Severity | Detection |
+|---|---|---|
+| Any pain point with `sourceCommunity` starting with `r/` (sourceType=reddit) | HIGH | The r/r/X rendering bug. UI prepends `r/` — pass bare names. Fix via `update_pain_point`. |
+| Any source post with `sourceCommunity` starting with `r/` | HIGH | Same bug. Fix via `update_source_post`. |
+| Any pain point with `sourceCommunity` starting with `@` (sourceType=twitter) | HIGH | UI prepends `@` — same r/r/ class of bug. |
+| Pain point with `score=0 AND num_comments=0` AND its sourceUrl appears in `postLinks[]` with non-zero numbers | HIGH | Forgot to populate scores. Map quote → source post → copy the real numbers. |
+| Pain point missing `pattern` field | HIGH | Required field; renders the category pill empty. |
+| Pain point `pattern` > 30 chars | LOW | Should be 2-4 word category, not a sentence. |
+| Pain point quote shorter than 30 chars | MEDIUM | Probably truncated or summary, not a real quote. |
+| > 4 pain points sharing the same sourceUrl | MEDIUM | Low source diversity — over-sampled one thread. |
+| Zero pain points from posts dated within 18 months | MEDIUM | Recency gap; the pain may have changed. |
+| Source post with `score=0 AND num_comments=0` | LOW | Either thread is dead or numbers weren't pulled. Verify via `reddit_get_post`. |
+| Source post missing `snippet` | LOW | Card looks bare without a one-liner. |
+| Source post missing `pain_pattern` | LOW | Used to color/group cards in UI. |
+| Existing solution missing `pricing` | MEDIUM | The pricing badge is a key buyer-comparison field. |
+| Existing solution missing `limitation` | MEDIUM | Reader can't see why-it-fails without it. |
+| Existing solution with all 6 scores at default 5 | MEDIUM | Scores weren't actually evaluated. |
+| Existing solution with `description` < 50 chars | LOW | Card body is bare. |
+| `pain_points.length` < 12 | HIGH | Below publication credibility bar. |
+| `postLinks.length` < 10 | HIGH | Below publication credibility bar. |
+| `existingSolutions.length` < 3 | MEDIUM | Below the comparison threshold readers expect. |
+| `apiRequirements.length` < 3 | LOW | Build spec is sparse for engineer evaluators. |
+
+### Verdict-state sanity checks
+
+Compare scores against verdict prefix:
+
+| Signal | Severity | Detection |
+|---|---|---|
+| `painIntensity ≤ 5 AND competitionLevel ≥ 7 AND verdict does NOT start with DISMISSED` | MEDIUM | Should this be killed? Either re-justify the build or DISMISS / `delete_app_idea`. |
+| `painIntensity ≥ 8 AND competitionLevel ≤ 3 AND verdict does NOT mention specific go-build action` | LOW | Strong setup but verdict reads tepid — sharpen the call. |
+| `verdict starts with VALIDATED` but no `existingSolutions` entry has the validating case study referenced | MEDIUM | VALIDATED prefix should be backed by a specific competitor making money. |
+| `verdict starts with DISMISSED` but the idea is still live (not soft-deleted) | LOW | Consider `delete_app_idea` to keep the public catalog clean. |
+
+### Output format
+
+For each scanned slug, return a structured report:
+
+```
+=== <slug> ===
+SCORE: <pass/warn/fail>
+HIGH: <count>
+MEDIUM: <count>
+LOW: <count>
+
+[HIGH] description (412 chars > 350): "..." → trim to ≤350, move detail to problem_statement
+[HIGH] problem_statement contains "$5K-$30K" — move to economics_context
+[HIGH] painPoint cmok... has sourceCommunity="r/SaaS" → update_pain_point with "SaaS"
+[MEDIUM] competition_notes (321 chars > 280) → split into why_existing_fails
+[LOW] highlights[3] (138 chars > 120) → tighten to one buying argument
+...
+```
+
+Group findings by severity. Cite the exact id/field/value so the reader can issue the surgical fix via `update_app_idea` / `update_pain_point` / `update_source_post`.
+
+### Auto-fix mode (use sparingly)
+
+For obvious mechanical fixes only — never auto-fix narrative or interpretation:
+
+- ✅ Strip `r/` prefix from all `sourceCommunity` values via `update_pain_point` / `update_source_post` — the normalize helper handles it on write
+- ✅ Fix pain point `score`/`num_comments` from matching source post numbers
+- ❌ Trim `description` text — needs a human eye for what to cut
+- ❌ Move money out of `problem_statement` — interpretation required
+- ❌ Add missing `why_existing_fails` content — needs research
+
+When invoking auto-fix, always print the proposed changes first and ask for confirmation.
+
+---
+
 ## MCP tools — when to use what
 
 ### First-time creation only
@@ -252,7 +382,7 @@ To get IDs for surgical updates: call `get_app_idea(slug)` (full data) or query 
 ```
 /app-ideas track [topic]
     → list_app_ideas (skip duplicates)
-    → memory check (skip KILLED ideas)
+    → registry + memory check (skip KILLED ideas)
     → 5 parallel scout agents (Round 1)
     → KILL the duds, return PURSUE list
     → 1 enrichment agent per PURSUE (Round 2)
@@ -262,7 +392,14 @@ To get IDs for surgical updates: call `get_app_idea(slug)` (full data) or query 
     → if new: create_app_idea once with full payload
     → if existing: update_app_idea (narrative) + add_*/update_* (relations)
     → verify with get_app_idea
-    → save shipped slugs + KILLED slugs to memory
+    → run /app-ideas smell [slug] to catch any leaks before declaring done
+    → save shipped slugs + KILLED slugs to registry + memory
+
+/app-ideas smell [slug]
+    → get_app_idea(slug) (or list_app_ideas + iterate for "all")
+    → run all 3 smell categories (FIELD DISCIPLINE, OWNERSHIP+AUTHENTICITY, DATA QUALITY)
+    → return per-slug report grouped by severity (HIGH / MEDIUM / LOW)
+    → optionally auto-fix r/r/ bugs and missing pain-point scores (with confirmation)
 ```
 
 ---

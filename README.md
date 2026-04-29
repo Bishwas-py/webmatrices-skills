@@ -27,6 +27,7 @@ Claude Code plugin for managing the [Webmatrices](https://webmatrices.com) commu
 |-------|---------|-------------|
 | app-ideas | `/webmatrices:app-ideas track [topic]` | Iterative pain-mining + parallel scout agents to validate or kill candidate app ideas |
 | app-ideas | `/webmatrices:app-ideas publish [slug]` | Push validated research to /app-ideas/[slug] with the strict three-section structure (Problem + Why Existing Fails + Economics callout) |
+| app-ideas | `/webmatrices:app-ideas smell [slug]` | Audit a published idea for field leaks (money in problem statement, competitors leaking), missing data, r/r/X rendering bugs, fabricated quotes, AI tells, and not-lifelike content |
 
 ### Moderation & admin
 
