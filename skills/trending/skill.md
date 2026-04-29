@@ -9,8 +9,6 @@ argument-hint: [topic / "non-ai" / "all"]
 
 Multi-platform content discovery. Searches Reddit, Twitter, Dev.to, Medium, and Google News in parallel, scores ideas by viral potential, and matches them to the best persona for Webmatrices.
 
-Replaces the old trending-topics skill with broader platform coverage and smarter scoring.
-
 ---
 
 ## ARGUMENTS
