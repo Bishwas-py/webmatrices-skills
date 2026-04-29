@@ -85,26 +85,30 @@ For each PURSUE idea, dispatch ONE enrichment agent to deepen to publication bar
 
 The page renders these sections in order. Field budgets are enforced by the page UX, not the schema — keep things terse.
 
-### Field-by-field budget + role (calibrated against 24 shipped pages)
+### Field-by-field budget + role
 
-Char/word ranges are derived from actual prod content. The "min" of each range is what the leanest live page uses; the "max" is the upper bound where the section starts feeling bloated. **Median** = where most well-written pages land.
+The **Allowed window** is the enforcement target — write to land inside it, never go past the upper bound. The recent 4 ideas (ADA Litigation Shield, SparkQuote, GrantClock, CottageLegal) are the gold standard for the three-section structure and all sit comfortably inside these windows.
 
-| Field | Type | Chars (min/med/max) | Role — what this field communicates |
-|---|---|---|---|
-| `description` (Overview) | plain | 110 / 250 / 350 | **What the product does, in one breath.** Product-tense ("Tool that analyzes X", "Phone-first estimator that..."). Reader should know in 2 seconds what they're buying. |
-| `target_audience` | plain | 30 / 55 / 100 | **Who specifically.** Role + segment + size hint. Singular focus — not a taxonomy of sub-personas. |
-| `revenue_model` | plain | 8 / 20 / 40 | **How money flows in.** Model name ("Monthly subscription", "Freemium", "Per-report + monthly"). Hybrid models are fine if literally accurate. |
-| `price_range` | VarChar(100) | 8 / 15 / 50 | **Actual prices.** Always include numbers. "$19-39/mo" or "Free up to 5, $9/mo unlimited". Hard cap 100 chars (DB column limit). |
-| `verdict` | plain | 80 / 145 / 250 | **The honest call.** Optional state keyword prefix: `VALIDATED` / `DISMISSED` / no prefix (default Build-tone). The UI styles `VALIDATED` and `DISMISSED` distinctively. |
-| `market_timing` | plain | 60 / 130 / 250 | **Why now.** 1–3 sentences naming the technical or market shift (new regulation, AI capability unlocked, demographic curve). Time-bound — answers "why didn't this exist 2 years ago." |
-| `competition_notes` | plain | 100 / 170 / 300 | **Named incumbents + the empty slot.** 3–5 short sentences. Each major competitor on its own with pricing + why-it-doesn't-fit-our-ICP. Ends with "the X tier is empty" or equivalent. |
-| `tried_and_rejected` | plain (optional) | 50 / 100 / 200 | **What users do today and why it breaks.** Scannable list-prose, comma-separated workarounds. Optional — populated on ~2/3 of pages. |
-| `highlights` | string[] | 50–120/bullet | **The case for Build, scannable.** 5–7 one-line bullets. Each bullet = one buying argument, named with a noun (incumbent, regulation, deadline, gap). Avg shipped page = 5.6 bullets. |
-| `problem_statement` | rich HTML | 600 / 800 / 1,200 | **PURE pain narrative.** 3–5 short paragraphs. Failure mode + what it looks like in practice + the most-repeated user ask. **NO money figures. NO competitor names.** Both go in their own fields. |
-| `why_existing_fails` | rich HTML | 600 / 900 / 1,200 | **Per-competitor breakdown.** Use `<h3>` per competitor or category. Each section: name + pricing in parens, then the specific reason it doesn't solve the user's problem. NEW field (older ideas don't have it). |
-| `economics_context` | rich HTML | 500 / 650 / 900 | **Money + market data — visual stat block.** 1–2 framing paragraphs + a `<ul>` of bolded numbers (settlements, market size, pricing pressure, TAM). Renders as emerald callout. NEW field (older ideas don't have it). |
+The "Reference" column shows where the recent 4 actually landed and where the older 24 (pre-split, looser discipline) drift — use as a sanity check.
 
-> **Heads up on older ideas:** the 24 ideas published before 2026-04-29 don't have `why_existing_fails` or `economics_context` — they predate the three-section split. Their `problem_statement` is correspondingly bloated (median 1,431 chars vs. 800 for the new structure). When backfilling old ideas, audit `problem_statement` and move money/competitor content out into the new fields.
+| Field | Type | **Allowed (chars)** | Reference: recent 4 \| older 24 (med) | Role — what this field communicates |
+|---|---|---|---|---|
+| `description` (Overview) | plain | **150 – 300** (hard cap 350) | 161–198 \| 247 | **What the product does, in one breath.** Product-tense ("Tool that analyzes X", "Phone-first estimator that..."). Reader knows in 2 seconds what they're buying. |
+| `target_audience` | plain | **50 – 100** | 64–87 \| 53 | **Who specifically.** Role + segment + size hint. Singular focus — not a taxonomy of sub-personas. |
+| `revenue_model` | plain | **8 – 30** | 8–25 \| 20 | **How money flows in.** Model name ("Monthly subscription", "Freemium", "Per-report + monthly"). Hybrid OK if literally accurate. |
+| `price_range` | VarChar(100) | **8 – 50** (hard cap 100, DB) | 9–36 \| 13 | **Actual prices.** Always include numbers. "$19-39/mo" or "Free up to 5, $9/mo unlimited". |
+| `verdict` | plain | **100 – 220** | 135–195 \| 147 | **The honest call.** Optional state prefix: `VALIDATED` / `DISMISSED` / no prefix (default Build-tone). UI styles `VALIDATED` and `DISMISSED` distinctively. |
+| `market_timing` | plain | **120 – 260** | 166–251 \| 130 | **Why now.** 1–2 sentences naming the technical/market shift (new regulation, AI unlocked, demographic curve). Time-bound — answers "why didn't this exist 2 years ago." |
+| `competition_notes` | plain | **150 – 280** | 178–267 \| 169 | **Named incumbents + the empty slot.** 3–5 short sentences. Each competitor with pricing + why-it-doesn't-fit-our-ICP. Ends with "the X tier is empty." |
+| `tried_and_rejected` | plain (optional) | **150 – 450** | 276–422 \| 97 | **What users do today and why it breaks.** Scannable list-prose, comma-separated workarounds. Strongly recommended (recent 4 all populate this). |
+| `highlights` | string[] | **5 – 7 bullets**, 50–120 chars each | 6–7 \| 5.6 | **The case for Build, scannable.** Each bullet = one buying argument named with a noun (incumbent, regulation, deadline, gap). |
+| `problem_statement` | rich HTML | **600 – 900** (hard cap 1,100) | 683–852 \| 1,431 | **PURE pain narrative.** 3–5 short paragraphs. Failure mode + what it looks like in practice + the most-repeated user ask. **NO money figures. NO competitor names.** Older ideas exceed this because they predate the three-section split. |
+| `why_existing_fails` | rich HTML | **600 – 1,000** (hard cap 1,200) | 668–1,014 \| (empty) | **Per-competitor breakdown.** Use `<h3>` per competitor or category. Each section: name + pricing in parens, then the specific reason it doesn't solve the user's problem. NEW field — backfill on older ideas. |
+| `economics_context` | rich HTML | **500 – 750** (hard cap 900) | 593–696 \| (empty) | **Money + market data — visual stat block.** 1–2 framing paragraphs + a `<ul>` of bolded numbers (settlements, market size, pricing pressure, TAM). Renders as emerald callout. NEW field — backfill on older ideas. |
+
+> **Read this if backfilling an older idea:** `whyExistingFails` and `economicsContext` are empty for all 24 pre-2026-04-29 ideas. Their `problem_statement` is bloated by ~80% (median 1,431 vs. 800 chars target) because money + competitor analysis was crammed in. Audit, then move that content out into the dedicated fields. Then trim `problem_statement` back into the 600–900 window.
+
+> **The 4-app-idea workflow rule:** when in doubt about a field, check what the recent 4 did. If your draft is wider than their range, trim. The recent 4 are the discipline; the older 24 are historical content that hasn't been migrated yet.
 
 ### Verdict state keywords
 
@@ -114,15 +118,24 @@ The UI checks `verdict?.startsWith('VALIDATED')` and `verdict?.startsWith('DISMI
 - `DISMISSED — ...` — we evaluated and killed it (use sparingly; usually `delete_app_idea` is better)
 - No prefix — default Build-tone verdict ("Strong build", "Build w/ caveat", etc.)
 
-### Where length goes wrong
+### Where length goes wrong (enforce these caps)
 
-- **description > 350 chars** → it's not an Overview anymore, it's a paragraph. Move detail into `problem_statement` or `economics_context`.
-- **target_audience > 100 chars** → sub-segments are leaking in. One sentence, not a taxonomy.
-- **competition_notes > 300 chars** → split structured competitor analysis into `why_existing_fails` (rich HTML), keep `competition_notes` as a 3–5 sentence scan.
-- **problem_statement > 1,200 chars on a NEW idea** → money or competitors are leaking in. Audit and move them to the dedicated fields.
-- **problem_statement < 600 chars** → too thin. Add the "what this looks like in real life" middle paragraph.
-- **highlights < 5 bullets** → page feels half-baked. Always 5–7.
-- **price_range > 100 chars** → Prisma rejects the write. Compress aggressively.
+| Symptom | Fix |
+|---|---|
+| `description` > 350 chars | It's a paragraph, not an Overview. Move detail to `problem_statement` or `economics_context`. |
+| `target_audience` > 100 chars | Sub-segments are leaking in. One sentence, not a taxonomy. |
+| `revenue_model` > 30 chars | Probably a description, not a model name. Pull out to `description` or `verdict`. |
+| `price_range` > 100 chars | Prisma rejects the write (DB hard cap). Compress aggressively. |
+| `verdict` > 220 chars | The case-for-Build is leaking in. Move bullets to `highlights`. |
+| `market_timing` > 260 chars | Probably listing market data. Move numbers to `economics_context`. |
+| `competition_notes` > 280 chars | Structured competitor analysis is leaking. Move to `why_existing_fails` (rich HTML), keep `competition_notes` as a 3–5 sentence scan. |
+| `problem_statement` > 1,100 chars on a NEW idea | Money or competitors are leaking in. Audit and move them to `economics_context` / `why_existing_fails`. |
+| `problem_statement` < 600 chars | Too thin. Add the "what this looks like in real life" middle paragraph + the most-repeated user ask. |
+| `why_existing_fails` > 1,200 chars | Per-competitor section is verbose. Trim each section to name + pricing + 1–2 sentence why-it-fails. |
+| `economics_context` > 900 chars | Visual block becomes a wall of text. Cut to ≤6 bullets + 1 framing paragraph. |
+| `highlights` < 5 bullets | Page feels half-baked. Always 5–7. |
+| `highlights` bullet > 120 chars | Bullet is a paragraph. One buying argument per bullet, one line each. |
+| `tried_and_rejected` not populated | Recent 4 all populate this. Add it — it sells the "current world is broken" narrative. |
 
 ### The three-section split (CRITICAL)
 
