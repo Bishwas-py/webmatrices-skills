@@ -32,7 +32,9 @@ After fetching content, also call `get_self_personas` MCP to load all persona tr
 
 ---
 
-## THREE SMELL CATEGORIES
+## FOUR SMELL CATEGORIES
+
+Categories 1-3 are pattern-matching: scan for specific tells, known phrases, structural anti-patterns. Category 4 is experiential: read line by line as a human reader and flag every place attention drops. Run all four for post-mode scans.
 
 ### Category 1: AUTHENTICITY
 
@@ -167,6 +169,99 @@ Detects structural problems that weaken content regardless of authenticity.
 
 ---
 
+### Category 4: ENGAGEMENT FLOW — The Line-by-Line Read
+
+The other three categories are pattern-matching: scan for known AI tells, factual issues, structural problems. This category is fundamentally different. You READ THE CONTENT LINE BY LINE AS A HUMAN READER WOULD, in real time, and flag every place attention drops, every line that hits, every line that hurts momentum.
+
+This is the test the actual reader runs in their head while reading. It catches friction that pattern-matching misses. Pattern-matching tells you whether AI wrote it. The line-by-line read tells you whether a human will actually read it all the way through.
+
+**This category is MANDATORY for any post-mode scan.** Skipping it means you only checked whether the content is technically clean, not whether it works as content.
+
+#### How to run the line-by-line read
+
+For every post or long-form comment:
+
+**1. Read the title.** Note where attention catches and where it slows. Where in the title does the actual hook land?
+
+**2. Read each paragraph in order.** For each one, internally answer:
+   - Did I want to read the next sentence?
+   - Where did my eye skip ahead?
+   - Did I have to re-read anything to understand it?
+   - Which specific sentences made me stop because they hit?
+   - Which sentences made me skim?
+   - Is this paragraph stating something we already established 1, 2, 3 paragraphs ago?
+
+**3. After the full read, answer:**
+   - How did the post FEEL overall? (One sentence gut reaction.)
+   - What was the emotional arc — what state was the reader in at P1, P5, P10, end?
+   - What lines are screenshot-worthy / quote-worthy / would-be-remembered?
+   - What lines hurt the post's momentum and should be cut?
+   - If forced to cut 20% of the words without losing substance, what goes first?
+
+**4. Report every friction point with paragraph number and exact quote.**
+
+#### Engagement Flow Flags
+
+| Signal | Severity | What to look for |
+|--------|----------|-----------------|
+| Same beat stated 3+ times | HIGH | The "same six words / rearrange / same script / they used the same six words" repetition pattern. Reader fatigues by repetition 3. |
+| Educational filler | HIGH | Explaining what the niche audience already knows (defining RPM to AdSense publishers, explaining what MRR is to SaaS founders). |
+| Hook lands too late | HIGH | The shock fact buried after 5+ setup sentences instead of in the first 3. |
+| Heading-body mismatch | HIGH | H2 says "90-day kill switch" but body asks for "60 days". Careful readers notice. |
+| Circular or unclear math/logic | HIGH | Sentences that force the reader to re-parse to understand the calculation. |
+| Repetition of named entity / case | HIGH | The same case/example callback used 4-5 times — by the fifth callback reader is annoyed. |
+| Multiple hedges per shock-line | MEDIUM | "around 300k" + "about $20" + "roughly" in one shock-sentence — dilutes the punch. Pick one hedge max. |
+| Performed phrasing | MEDIUM | "The part I couldn't unsee", "this is what genuinely made me close my laptop" — announces emotion instead of showing. |
+| Overpromising adverb | MEDIUM | "verbatim", "literally", "exactly" used where the claim is approximate. Reader pauses. |
+| Wordy when tight would land | MEDIUM | Sentences using 12 words to say what 7 could. Especially in punchline positions. |
+| Parallel-shotgun fragments | MEDIUM | 3+ short period-separated sentences in a row, even when not the banned "Not X. Not Y. Z." pattern. Catches paragraphs like "Four pitches reached me. I took two calls. One rep cited my RPM range." |
+| Standalone pull-quote paragraph | MEDIUM | One-sentence paragraph sitting alone that should fold into a neighbor for momentum. Reads like a marketing pull-quote, not flowing prose. |
+| Jargon mismatch with audience | MEDIUM | Niche jargon ("delta", "tailwind", "fan-out") fine for the platform's core audience but hurts skimmability for adjacent readers. Flag, don't always fix — depends on intended reach. |
+| Missing critical punctuation | MEDIUM | Questions written without "?", quotes missing closing punctuation — reader pauses involuntarily. |
+| Diluted closing ask | MEDIUM | "Anyone running X right now and willing to share, what's your Y" — filler words ("right now and willing to share") inside the actual ask. |
+| Verb mismatch with action | MEDIUM | "I was going to compare the four networks by name" when the action is naming, not comparing. The wrong verb makes the reader re-process. |
+| Weak qualifier doing nothing | LOW | "anyone running AdSense on a content site with real traffic" — "with real traffic" earns little, reader skips. |
+| Stock cliché | LOW | "the math is doing the talking", "at the end of the day", "before you sign anything" — eye glides over. |
+| Granularity that delays punch | LOW | "Mostly US, with Canada, Australia, and Europe rounding it out" before the actual shock number lands. Detail can move later. |
+
+#### The Emotional Arc Check
+
+Map the reader's emotional state through the post. For each major beat / paragraph, name the state:
+
+```
+P1 (opener):     hooked | curious | confused | bored
+P2 (data hit):   angry | validated | skeptical | indifferent
+P3 (pivot):      trust-building | fatigued | curious | distracted
+...
+Closing:         share-ready | scroll-past | wants-to-comment | forgot
+```
+
+If the arc is FLAT (one note all the way through), flag it. Strong posts MOVE the reader emotionally. AI-written posts tend to hit one note and stay there. A real journey looks like: hooked → angry → curious → trust → outrage → empowerment → humility → engagement.
+
+Severity: HIGH if the arc never moves. MEDIUM if it moves but resolves too early (reader checks out at 60%).
+
+#### Screenshot-Worthy Line Inventory
+
+After the read, list:
+
+**Lines that earn their place** (would be screenshot, quoted, remembered):
+- "[exact quote] — paragraph N"
+
+**Lines that hurt momentum** (cut candidates):
+- "[exact quote] — paragraph N — reason"
+
+Rule of thumb:
+- 0 screenshot-worthy lines → forgettable post, structural rewrite needed
+- 1-2 → solid post
+- 3-5 → viral-adjacent post
+- 6+ → either genuinely exceptional or the writer is overpolishing every line, which is itself an AI tell
+
+#### Word-Cut Test
+
+Final gut check: "If I had to cut this post by 20% without losing substance, what would I cut?" If you can find 20%+ of the words to remove without losing any substance, the post is over-padded. Real authors leave on the cutting room floor what they need to. AI-written content rarely has obvious cuts because it's optimized to fill space, not to land.
+
+---
+
 ## COMMENT SMELL (when scanning comments or threads)
 
 ### Cross-Persona Bleeding
@@ -293,6 +388,39 @@ QUALITY FLAGS:
   [HIGH] All sections at same polish level -- vary quality
   [MEDIUM] Section 3 is filler -- could be deleted without losing information
 
+ENGAGEMENT FLOW FLAGS (line-by-line read):
+  [HIGH] Same beat "same six words" repeated 4x in paragraphs 3, 4, 5, 11 -- reader fatigue
+  [HIGH] Hook ($20 / 300k) lands in sentence 6 -- should land by sentence 3
+  [HIGH] Heading "90-day kill switch" mismatches body's "60 days"
+  [MEDIUM] Paragraph 2 has 2 hedges in shock-line: "around 300k" + "about $20" -- pick one
+  [MEDIUM] Paragraph 4 has 3 short period-separated sentences in a row (parallel-shotgun)
+  [MEDIUM] "verbatim" overpromises in paragraph 3 -- approximate claim
+  [LOW] "with real traffic" qualifier in P1 earns little
+
+EMOTIONAL ARC:
+  P1: hooked
+  P2: angry
+  P3: pattern-recognition
+  P4: trust-building
+  P5-7: outrage
+  P8: empowered (tactical payoff)
+  P9: trust deepens (mid-thought correction)
+  P10-11: satisfaction (falsification test)
+  P12-14: complicity / engagement-ready
+  → Arc moves through 7+ states. Strong.
+
+SCREENSHOT-WORTHY LINES:
+  - "I asked them to put that in writing. They declined." (P5)
+  - "Lower than what a recipe blog with no ads above the fold gets in Q1." (P2)
+  - "What it actually protects the network from is your baseline." (P6)
+  - "If they can't tell you, walk." (P8)
+  - "They'll find you too." (P14)
+
+CUT CANDIDATES:
+  - "with real traffic" (P1) -- earns nothing
+  - "That's every cold email, verbatim." (P3) -- redundant with "rearrange in any order"
+  - "Plenty of small sites can't get into AdX directly because of business verification thresholds" (P6) -- audience knows this
+
 DEEP AUTHENTICITY FLAGS:
   [HIGH] POLITE STRANGER: Content approximates the persona's voice but doesn't inhabit it. Reads like someone who read their bio, not someone who lived their life.
   [HIGH] TEMPLATE TEST: This post could be rewritten for a different persona with minor voice changes. Content is generic with voice applied.
@@ -300,13 +428,24 @@ DEEP AUTHENTICITY FLAGS:
   [MEDIUM] THINKING PROCESS: Conclusions presented without showing how they were reached. Add visible reasoning journey.
 
 SUGGESTIONS:
+  PATTERN FIXES:
   1. Remove em dash in paragraph 3 -- rewrite as two sentences
   2. Rewrite "Not X, but Y" in paragraph 5
   3. Make section 2 tighter and section 5 looser (vary quality)
-  5. Run /fact-check on 2 flagged claims
-  6. Add a backstory-specific detail from persona's DB (location, career, specific past experience)
-  7. Show the thinking process: add a "I initially thought X but then..." moment
-  8. Remove one explanation the audience already knows (the Unsaid Test)
+  4. Run /fact-check on 2 flagged claims
+  5. Add a backstory-specific detail from persona's DB (location, career, specific past experience)
+  6. Show the thinking process: add a "I initially thought X but then..." moment
+  7. Remove one explanation the audience already knows (the Unsaid Test)
+
+  ENGAGEMENT FLOW FIXES (from line-by-line read):
+  8. Cut "with real traffic" qualifier in P1 (earns nothing)
+  9. State "same six words" anchor ONCE — currently stated 4x across P3, P4, P5, P11
+  10. Fix heading-body mismatch ("90-day" heading vs "60 days" body)
+  11. Move shock fact ($20 / 300k) to first 3 sentences -- currently lands at sentence 6
+  12. Replace "verbatim" with softer claim (current usage overpromises)
+  13. Fold standalone pull-quote paragraph (P12) into P11 for momentum
+  14. Cut the RPM definition lines in P8 (audience knows RPM)
+  15. Tighten closing question -- drop "right now and willing to share" filler
 ```
 
 ### Thread Scan
@@ -339,9 +478,13 @@ FLAGS:
 
 ### Score Definitions
 
-- **CLEAN**: No HIGH severity flags. Minor issues only. Safe to publish/leave as-is.
-- **SMELLS OFF**: 1-2 HIGH severity flags or 4+ MEDIUM flags. Should fix before publishing or if already published, consider editing.
-- **REWRITE NEEDED**: 3+ HIGH severity flags. Content would fail organic scrutiny. Must rewrite before publishing. If already published, edit or consider deletion.
+HIGH/MEDIUM flags from all four categories count toward the thresholds equally. An engagement-flow HIGH flag (e.g., the hook lands 6 sentences late) is just as serious as an authenticity HIGH flag (e.g., em dash in body).
+
+- **CLEAN**: No HIGH severity flags from any category. Minor issues only. Safe to publish/leave as-is.
+- **SMELLS OFF**: 1-2 HIGH severity flags or 4+ MEDIUM flags across all four categories. Should fix before publishing or if already published, consider editing.
+- **REWRITE NEEDED**: 3+ HIGH severity flags across all four categories. Content would fail organic scrutiny OR fail to hold a reader's attention. Must rewrite before publishing. If already published, edit or consider deletion.
+
+A post can be CLEAN on authenticity (no AI tells) but REWRITE NEEDED on engagement flow (reader bails by paragraph 4). Both matter.
 
 ---
 
@@ -350,8 +493,21 @@ FLAGS:
 1. **Parse input** -- detect whether its a postId, slug, commentId, username, or raw text
 2. **Fetch content** from MCP
 3. **Fetch persona data** from `get_self_personas` MCP (needed for voice/apostrophe comparison)
-4. **Run all three categories** of checks (AUTHENTICITY including deep structural tests, FACTUAL, QUALITY)
-5. **If scanning a thread**, also run comment smell checks
-6. **If scanning a user**, also run user smell checks
-7. **Generate the report** with score + flags + suggestions
-8. **If REWRITE NEEDED**, suggest running `/reduce-smell` to fix the issues
+4. **Run pattern-matching checks** (Categories 1-3: AUTHENTICITY including deep structural tests, FACTUAL, QUALITY)
+5. **Run the line-by-line read** (Category 4: ENGAGEMENT FLOW) -- MANDATORY for post-mode scans
+   - Read each paragraph as a human reader in real time
+   - Flag every friction point with paragraph number + exact quote
+   - Map the emotional arc through the post
+   - Inventory screenshot-worthy lines and cut candidates
+   - Run the word-cut test (could 20% be removed?)
+6. **If scanning a thread**, also run comment smell checks
+7. **If scanning a user**, also run user smell checks
+8. **Generate the report** with score + flags + emotional arc + screenshot inventory + cut candidates + suggestions
+9. **If REWRITE NEEDED**, suggest running `/reduce-smell` to fix the issues
+
+### When to skip Category 4
+
+The line-by-line read is mandatory for full post scans. Skip it ONLY for:
+- Short comment scans (<150 words) — comments don't need an arc check
+- User scans where you're scanning many posts for cross-post consistency (line-by-line each post is too expensive — do it on the most recent post only)
+- Quick "recent" scans where you're checking for cross-persona bleeding (one focused read on the most viral-looking post is enough)
