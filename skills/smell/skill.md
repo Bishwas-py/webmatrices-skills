@@ -11,8 +11,20 @@ Universal authenticity scanner. Detects AI tells, factual issues, quality proble
 
 No subcommands. Auto-detects what you're scanning based on the input.
 
+For the canonical universal-block list (em-dash, "Honestly," opener, clause-hyphen, formal connectors, AI vocab, etc.), see [universal-blocks.md](../_shared/universal-blocks.md). Every block in that file is a HIGH severity detector here.
+
 For engagement psychology research, see [engagement-psychology.md](../_shared/engagement-psychology.md).
 For reply quality patterns, see [reply-patterns.md](../_shared/reply-patterns.md).
+
+---
+
+## CORE FRAMING (v2.1)
+
+Voice is per-persona, anchored to `writingSamples`. Detectors compare output against the persona's samples for sentence shape, casing, punctuation rhythm, and length. Drift from samples is a smell.
+
+Stance is per-persona, anchored to `backstory`. Detectors check whether opinions trace back to lived experience. Detached opinions (no backstory hook) are a smell.
+
+**Do not confuse the two.** A persona that sounds wrong (sentence shape mismatch) has a *voice* smell. A persona that takes a stance they couldn't have arrived at (no backstory) has a *stance* smell. They have different fixes.
 
 ---
 
@@ -44,7 +56,9 @@ Detects patterns that make content feel AI-generated or fake.
 
 | Signal | Severity | Example |
 |--------|----------|---------|
-| Em dash (--) in content | HIGH | "the real problem -- and nobody talks about this -- is..." |
+| Em dash (—) in content | HIGH | "the real problem — and nobody talks about this — is..." |
+| Hyphen `-` as clause punctuation | HIGH | "the problem - and nobody talks about this - is..." (compound words like `well-known` are exempt) |
+| "Honestly," as a sentence opener | HIGH | "Honestly, the pricing is the issue." (mid-sentence "honestly" is fine) |
 | "Not X, but Y" structures | HIGH | "its not about traffic, but about intent" |
 | Bullet points in conversational comments | HIGH | Comments formatted as advice lists |
 | Too helpful / too complete | MEDIUM | Comment covers every angle, leaves nothing to add |
@@ -77,6 +91,44 @@ Compare current content against persona's `metadata.personaTraits.backstory` and
 #### Apostrophe Pattern (informational only — do NOT score against)
 
 Apostrophe consistency is a SOFT signal, not a scoring factor. Note the pattern for context but do NOT flag apostrophe drift as a smell. Real people are inconsistent with apostrophes and their patterns shift naturally. Only mention apostrophes in the report as an informational note, never as a HIGH or MEDIUM flag.
+
+#### Voice Drift from Samples (v2.1)
+
+Compare the output against the persona's `metadata.personaTraits.writingSamples`. Drift on the following dimensions is a smell:
+
+| Signal | Severity | What to look for |
+|--------|----------|-----------------|
+| Sentence length drift | HIGH (replies), MEDIUM (posts) | Output's avg sentence length is >1.5× the samples' avg sentence length, or <0.5× |
+| Casing drift | MEDIUM | Samples are lowercase but output uses Title Case in headings; or samples are standard caps but output drops capitals everywhere |
+| Punctuation rhythm drift | MEDIUM | Samples use commas + run-ons; output uses period-heavy staccato. Or vice versa. |
+| Fragment usage drift | MEDIUM | Samples include fragments and dropped articles; output is all complete sentences. (Or the reverse.) |
+| Slang / swears mismatch | HIGH | Output uses casual swears the samples never use, or vice versa |
+| Signature phrase absence | LOW | Persona has signature phrases but none surface in a long post (informational — phrases don't have to appear every time) |
+
+#### Reply Length Anchor (v2.1, reply mode only)
+
+For replies and comments, compare output word count against the persona's reply-style sample average:
+
+- Prefer `metadata.personaTraits.writingSamples.replies` if present (flat array of 3 short example replies)
+- If `.replies` is missing, fall back to short-form samples in `writingSamples`
+- Cap: sample avg × 1.5
+
+| Signal | Severity | What to look for |
+|--------|----------|-----------------|
+| Reply over cap | HIGH | Output > sample avg × 1.5 (essay-length reply when samples are 1-3 sentences) |
+| Reply far below cap | LOW | Output < sample avg × 0.3 (one-word reply when samples are 2-3 sentences — usually fine but flag for review) |
+| No reply samples available | INFO | Persona has no `writingSamples.replies` — output couldn't be length-checked. Recommend adding reply samples. |
+
+#### Stance Drift from Backstory (v2.1)
+
+Stance, not voice. Check whether the persona's expressed opinion traces back to their backstory:
+
+| Signal | Severity | What to look for |
+|--------|----------|-----------------|
+| Detached opinion | HIGH | Strong stance with no backstory hook. Persona writes "vibe coding is dangerous" but backstory has no relevant experience. |
+| Borrowed expertise | HIGH | Persona claims technical authority their backstory doesn't support. |
+| Stance contradicts recent posts | HIGH | Persona's last 2-3 posts hold opinion X; this post holds ¬X with no transition or growth event. |
+| Stance evolves naturally | OK (no flag) | Persona explicitly notes the change: "I used to think X but..." — this is *growth*, not drift. |
 
 #### Hypothetical Realness
 
@@ -492,18 +544,19 @@ A post can be CLEAN on authenticity (no AI tells) but REWRITE NEEDED on engageme
 
 1. **Parse input** -- detect whether its a postId, slug, commentId, username, or raw text
 2. **Fetch content** from MCP
-3. **Fetch persona data** from `get_self_personas` MCP (needed for voice/apostrophe comparison)
-4. **Run pattern-matching checks** (Categories 1-3: AUTHENTICITY including deep structural tests, FACTUAL, QUALITY)
-5. **Run the line-by-line read** (Category 4: ENGAGEMENT FLOW) -- MANDATORY for post-mode scans
+3. **Fetch persona data** from `get_self_personas` MCP (needed for voice/sample comparison, stance/backstory comparison, apostrophe context)
+4. **Run universal-block checks** ([_shared/universal-blocks.md](../_shared/universal-blocks.md)) — em-dash, clause-hyphen, "Honestly," opener, formal connectors, AI vocab, performed emotion, engagement bait. Every block hit is HIGH severity.
+5. **Run pattern-matching checks** (Categories 1-3: AUTHENTICITY including voice drift, length anchor, stance drift, deep structural tests, FACTUAL, QUALITY)
+6. **Run the line-by-line read** (Category 4: ENGAGEMENT FLOW) -- MANDATORY for post-mode scans
    - Read each paragraph as a human reader in real time
    - Flag every friction point with paragraph number + exact quote
    - Map the emotional arc through the post
    - Inventory screenshot-worthy lines and cut candidates
    - Run the word-cut test (could 20% be removed?)
-6. **If scanning a thread**, also run comment smell checks
-7. **If scanning a user**, also run user smell checks
-8. **Generate the report** with score + flags + emotional arc + screenshot inventory + cut candidates + suggestions
-9. **If REWRITE NEEDED**, suggest running `/reduce-smell` to fix the issues
+7. **If scanning a thread**, also run comment smell checks
+8. **If scanning a user**, also run user smell checks
+9. **Generate the report** with score + flags + emotional arc + screenshot inventory + cut candidates + suggestions
+10. **If REWRITE NEEDED**, suggest running `/reduce-smell` to fix the issues
 
 ### When to skip Category 4
 

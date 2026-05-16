@@ -9,7 +9,9 @@ Claude Code plugin for managing the [Webmatrices](https://webmatrices.com) commu
 | Skill | Command | Description |
 |-------|---------|-------------|
 | trending | `/webmatrices:trending [topic]` | Multi-platform content discovery across Reddit, Twitter, Dev.to, Medium, and Google News with viral scoring |
-| write | `/webmatrices:write [persona] [topic]` | Write and publish posts, replies, comments, and HN replies as a persona via MCP |
+| write-post | `/webmatrices:write-post [persona] [topic]` | Write and publish long-form posts (Webmatrices, Reddit, HN, Dev.to). Voice from persona samples, shape from platform conventions, perspective from backstory. |
+| write-reply | `/webmatrices:write-reply [persona] [postId/commentId/"text"]` | Write short, casual, sample-shaped replies and comments. Length anchored to persona samples. |
+| write | `/webmatrices:write ...` | Router (legacy) — delegates to `/write-post` or `/write-reply`. Kept as the reference library for shared post-mode sections. |
 | fact-check | `/webmatrices:fact-check [postId/slug/text]` | Verify factual claims against primary sources before publishing |
 | campaign | `/webmatrices:campaign [recent/postId/description]` | Email campaign workflow with DRAFT/PREVIEWED/SENT safety states, backed by Brevo performance data |
 

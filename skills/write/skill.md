@@ -1,31 +1,64 @@
 ---
 name: write
-description: Write and publish content for Webmatrices. Handles posts, replies, comments, and HN replies. Fetches persona data from MCP, researches via SuperMCP, enforces authenticity rules, fact-checks claims, previews via Playwright, and publishes via MCP. Use when asked to write a post, draft content, reply to a post, write a comment, write an HN reply, or publish content.
+description: ROUTER — use /write-post for long-form posts or /write-reply for short replies/comments. This skill remains as a reference library for post-mode shared sections (Ownership Principle, Source Laundering, Hook Engineering, Title Rules, Engagement Blueprint, Deep Authenticity tests).
 disable-model-invocation: true
 argument-hint: [persona] [topic / reply postId / hn-reply "text"]
 ---
 
-# Write
+# Write (router)
 
-Write viral, engagement-ready content for Webmatrices and publish it. This skill handles voice, structure, authenticity, publishing via MCP, and designing content that naturally attracts organic engagement. It also handles replies, comments, and HN responses.
+This skill has been split into two focused skills as of v2.1:
 
-For topic discovery, use `/trending` first, then hand off here.
+| Use case | Skill |
+|----------|-------|
+| Long-form posts (Webmatrices, Reddit, HN, Dev.to) | [/write-post](../write-post/skill.md) |
+| Short reactions (comments, replies, HN replies, thread responses) | [/write-reply](../write-reply/skill.md) |
+
+If invoked directly, route as follows:
+
+- `/write [persona] [topic]` → run `/write-post [persona] [topic]`
+- `/write [persona] reply [postId]` → run `/write-reply [persona] [postId]`
+- `/write [persona] hn-reply "[text]"` → run `/write-reply [persona] hn "[text]"`
+- `/write preview` → run `/write-post preview` or `/write-reply preview` depending on the active draft type
+- `/write publish` → run `/write-post publish` or `/write-reply publish` depending on the active draft type
+
+For topic discovery, use `/trending` first, then hand off to the appropriate write skill.
 For persona matching, see the [audience-matcher skill](../audience-matcher/SKILL.md).
 For engagement psychology and organic patterns, see [engagement-psychology.md](../_shared/engagement-psychology.md).
 For reply quality patterns, see [reply-patterns.md](../_shared/reply-patterns.md).
+For universal content blocks (always apply), see [universal-blocks.md](../_shared/universal-blocks.md).
 
-## Subcommands
+---
 
-| Command | What it does |
-|---------|-------------|
-| `/write [persona] [topic]` | Draft a post as that persona about that topic |
-| `/write [persona] reply [postId]` | Draft a comment on an existing post |
-| `/write [persona] hn-reply "[text]"` | Draft a Hacker News reply to quoted text |
-| `/write preview` | Preview the current draft via `preview_post` or `preview_comment` MCP + open in Chrome via Playwright |
-| `/write publish` | Publish the approved draft via `create_post` or `create_comment` MCP + `generate_og_image` |
+## Why this file still exists
 
-If no persona provided, auto-match using audience-matcher logic after fetching personas from MCP.
-If no args at all, ask what to write about.
+The sections below remain as the **canonical reference** for the patterns that `/write-post` and `/write-reply` build on:
+
+- **Ownership Principle** + Source Laundering Rule
+- **Hook Engineering** table
+- **Title Rules** (Webmatrices post defaults)
+- **Engagement Blueprint** template
+- **Deep Authenticity** tests (Polite Stranger Problem, Five Tests, Template Test)
+- **AI-Detection Resistance** lessons learned from HN
+- **Cross-Persona Consistency** rules
+- **Engagement-Ready Content Design** (Gap Principle, Engagement Hooks, Hypothetical Numbers)
+- **Emotional Pacing** and **Structure Rules**
+
+`/write-post` cites these by section heading. Do not delete them — moving them into the new skills would balloon their length and obscure the new core rule (voice from samples, shape from platform, perspective from backstory).
+
+Sections below are reference material. Treat `/write-post` and `/write-reply` as the entry points.
+
+---
+
+## Legacy subcommands (deprecated, will route to new skills)
+
+| Command | Routes to |
+|---------|-----------|
+| `/write [persona] [topic]` | `/write-post [persona] [topic]` |
+| `/write [persona] reply [postId]` | `/write-reply [persona] [postId]` |
+| `/write [persona] hn-reply "[text]"` | `/write-reply [persona] hn "[text]"` |
+| `/write preview` | `/write-post preview` or `/write-reply preview` |
+| `/write publish` | `/write-post publish` or `/write-reply publish` |
 
 ---
 
@@ -83,7 +116,9 @@ Check EVERY draft against this list. Violating any of these kills authenticity.
 
 | BANNED | WHY |
 |--------|-----|
-| Em dash (--) | #1 AI signature tell. EXCEPTION: the admin persona's help replies only |
+| Em dash (—) | #1 AI signature tell. NO EXCEPTIONS — see [universal-blocks.md](../_shared/universal-blocks.md) |
+| Hyphen `-` as clause punctuation | AI rhythm tell. Compound words like `well-known` are fine. See [universal-blocks.md](../_shared/universal-blocks.md) |
+| "Honestly," as a sentence opener | AI scaffolding. Mid-sentence "honestly" is fine. See [universal-blocks.md](../_shared/universal-blocks.md) |
 | Colons in titles | Robotic |
 | Colons in prose | Stops the flow |
 | "Not X, but Y" structures | Claude's fingerprint |
@@ -194,7 +229,9 @@ Surface-level checks (em dashes, banned phrases, apostrophes) are table stakes. 
 
 **Five tests every draft must pass:**
 
-1. **SPECIFICITY FROM BACKSTORY.** Every hypothetical detail must come from the personas accumulated life story in metadata.personaTraits.backstory. Not generic. Not plausible-sounding. SPECIFIC to THIS persons life. The persona doesnt mention "a cafe" -- they mention the specific cafe from their backstory with the exact price change. They dont say "I lost my job" -- they reference the specific detail from their backstory that only they would know.
+1. **SPECIFICITY FROM BACKSTORY.** Every hypothetical *detail* must come from the persona's accumulated life story in `metadata.personaTraits.backstory`. Not generic. Not plausible-sounding. SPECIFIC to THIS person's life. The persona doesn't mention "a cafe" — they mention the specific cafe from their backstory with the exact price change. They don't say "I lost my job" — they reference the specific detail from their backstory that only they would know.
+
+   **Important — backstory drives DETAILS, not VOICE.** Sentence shape, casing, slang, and punctuation rhythm come from `writingSamples`. Backstory tells you WHICH cafe to mention; samples tell you HOW the persona would say it. Mixing these is the load-bearing distinction in v2.1.
 
 2. **EARNED OPINIONS.** The persona doesnt conclude X because its logical. They conclude X because their backstory led them there through accumulated frustration or joy. The persona doesnt say "vibe coding has costs" because a study showed it. They say it because THEY lived through the specific experience in their backstory that earned them that view. The opinion must feel ARRIVED AT, not DERIVED.
 
@@ -444,7 +481,9 @@ Every technical claim, statistic, and product behavior description must be verif
 
 Run every draft through this checklist:
 
-- [ ] ctrl+F for em dashes (--). Destroy every one. (EXCEPTION: admin persona help replies)
+- [ ] ctrl+F for em dashes (—). Destroy every one. **No exceptions** — see [universal-blocks.md](../_shared/universal-blocks.md).
+- [ ] ctrl+F for "Honestly," at the start of sentences. Strip the opener.
+- [ ] ctrl+F for hyphens between words with spaces (` - `). Replace with periods or commas.
 - [ ] ctrl+F for "Not X, but Y". Rewrite.
 - [ ] ctrl+F for every phrase in the HARD BANNED LIST.
 - [ ] Fact-check every stat against PRIMARY sources (not blogs, not Reddit).
@@ -562,11 +601,11 @@ HN replies have strict rules because HN readers are the most AI-detection-aware 
 6. Maximum 4-5 sentences
 7. No sign-off or closing question
 
-### Mode: Help reply (`/write [admin-persona] reply [postId]`)
+### Mode: Help reply (`/write-reply [admin-persona] [postId]`)
 
 When the admin persona (fetch from `get_self_personas` MCP, the site owner account) is replying to a real user asking for help (AdSense review, site review, etc.):
 
-1. Em dashes ARE allowed (the admin persona's natural voice uses them)
+1. **No em-dashes.** The previous exception is revoked. The admin persona follows the same universal blocks. If the admin's `writingSamples` contain em-dashes, those samples need cleaning.
 2. Genuine helpful tone, not performative helpfulness
 3. Reference specific details from the user's post/site
 4. If URL is present, use Playwright to crawl the site first

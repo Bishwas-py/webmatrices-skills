@@ -9,7 +9,9 @@ argument-hint: [postId/slug/commentId/"raw text"]
 
 Fix authenticity, factual, and quality problems detected by `/smell`. This skill runs `/smell` internally, generates targeted fixes for every flag, and previews the result. It NEVER publishes or updates content directly.
 
-**STRICT RULE: This skill NEVER publishes. It only suggests fixes and opens a preview. The user must run `/write publish` or manually approve any changes.**
+**STRICT RULE: This skill NEVER publishes. It only suggests fixes and opens a preview. The user must run `/write-post publish` or `/write-reply publish` or manually approve any changes.**
+
+For the canonical universal-block fix recipes (em-dash, "Honestly," opener, clause-hyphen, formal connectors, AI vocab, performed emotion, engagement bait), see [_shared/universal-blocks.md](../_shared/universal-blocks.md). Those fixes are the source of truth — this skill applies them.
 
 ---
 
@@ -116,15 +118,51 @@ Review the changes, then:
 
 | Flag | Fix strategy |
 |------|-------------|
-| Em dash | Split into two sentences, or use comma |
+| Em dash (—) | Split into two sentences, or use comma. **No exceptions** — see [universal-blocks.md](../_shared/universal-blocks.md). |
+| Hyphen `-` as clause punctuation | Split into two sentences. Or replace with a comma if clauses are tightly coupled. Compound words like `well-known` are exempt. |
+| "Honestly," as a sentence opener | Delete "Honestly, " entirely. If the sentence collapses, rewrite from scratch with the same meaning in the persona's sample voice. Mid-sentence "honestly" is fine, leave it. |
 | "Not X, but Y" | Rewrite as two separate statements |
 | AI vocabulary | Replace with the persona's natural word choices from their writing samples |
-| ChatGPT openers | Delete entirely, start with the actual content |
-| Performed emotions | Replace announced emotion with specific mundane detail |
+| Formal connectors (`Furthermore`, `Additionally`, `Moreover`, `In conclusion`, `That said,` opener) | Delete the connector. Let the section shift be abrupt (more human). Or replace with the persona's natural connector pattern from samples. |
+| ChatGPT openers ("Fair point", "Great question!", "Absolutely!") | Delete entirely, start with the actual content |
+| Performed emotions | Replace announced emotion with specific mundane detail (use backstory if possible) |
 | Missing mid-thought correction | Insert a natural backtrack at a place where the persona might reconsider |
 | Apostrophe mismatch | Informational only — do not fix. Natural drift is expected and tolerated. |
 | Emojis in h2 | Remove all emojis from subheadings |
 | Backstory contradiction | Rewrite to align with established backstory, or reframe as the persona updating their view |
+
+### Voice drift fixes (v2.1)
+
+When `/smell` flags voice drift from samples, fix by re-anchoring to the persona's `writingSamples`:
+
+| Flag | Fix strategy |
+|------|-------------|
+| Sentence length drift (output too long per sentence) | Break long sentences into the rhythm of the samples. Match sample average sentence length within ±20%. |
+| Sentence length drift (output too short, staccato) | Combine short sentences with conjunctions or commas. Mix in compound sentences to match sample rhythm. |
+| Casing drift | If samples are lowercase, lowercase the output (proper nouns stay capitalized). If samples are standard caps, standard-case the output. |
+| Punctuation rhythm drift | Re-pattern punctuation to match samples. If samples use commas + run-ons, replace some periods with commas. If samples are period-heavy, break run-ons. |
+| Fragment usage drift | If samples include fragments, drop articles in 1-2 places to introduce fragments. If samples are all complete sentences, complete any fragments in output. |
+| Slang / swears mismatch | Strip swears/slang the samples don't use. Add casual swears (e.g., "wtf", "tbh") only if samples have them. |
+
+### Reply length fixes (v2.1, reply mode only)
+
+When `/smell` flags reply over the length cap (sample avg × 1.5):
+
+| Flag | Fix strategy |
+|------|-------------|
+| Reply over cap | Cut to sample avg × 1.2. Default target: 1-3 sentences. Identify the *one* point the persona is making. Keep that sentence. Cut everything else (qualifiers, second points, closing context). |
+| Reply far over cap (essay-length) | Reduce to the single most-essential reaction. If the reply has 3+ ideas, the persona is writing a mini-post, not a reply — flag for conversion to `/write-post` or aggressive cut. |
+| Forced backstory in short reply | If a 2-sentence reply contains a credentialing clause ("as someone with X years of experience..."), delete the clause. Keep the reaction. |
+
+### Stance drift fixes (v2.1)
+
+When `/smell` flags stance drift from backstory:
+
+| Flag | Fix strategy |
+|------|-------------|
+| Detached opinion (no backstory hook) | Trace the opinion back to the persona's backstory. Add the specific experience that EARNED the view. If no backstory supports the opinion, either (a) add backstory context via `update_persona` MCP, or (b) soften the claim to speculation. |
+| Borrowed expertise | Either add the expertise to backstory (via `update_persona`) or reframe as the persona's question/observation rather than authority. |
+| Stance contradicts recent posts | Either reframe as growth ("I used to think X but after [specific event from timeline] I think Y") or align with prior stance. Don't pretend the contradiction doesn't exist. |
 
 ### Deep authenticity fixes (THE THIN LINE)
 
